@@ -1,0 +1,42 @@
+{
+  "name": "mmtrading",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server/server.js",
+    "dev:nodemon": "nodemon --watch server/server.js server/server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "isomorphic-unfetch": "^3.0.0",
+    "mongoose": "^5.9.10",
+    "next": "9.3.5",
+    "passport": "^0.4.1",
+    "passport-steam": "^1.0.14",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "steam-totp": "^2.1.1",
+    "steam-tradeoffer-manager": "^2.10.1",
+    "steam-user": "^4.15.1",
+    "steamcommunity": "^3.41.3",
+    "styled-components": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/express": "^4.17.6",
+    "@types/express-session": "^1.17.0",
+    "@types/mongoose": "^5.7.13",
+    "@types/passport": "^1.0.3",
+    "@types/passport-steam": "^1.0.1",
+    "@types/react": "^16.9.34",
+    "@types/steam-totp": "^2.1.0",
+    "@types/styled-components": "^5.1.0",
+    "babel-plugin-styled-components": "^1.10.7",
+    "nodemon": "^2.0.3",
+    "typescript": "^3.8.3"
+  }
+}
