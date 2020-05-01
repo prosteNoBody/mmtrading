@@ -1,0 +1,9 @@
+{
+    "bot_id": "",
+    "bot_display_name": "",
+    "bot_username": "",
+    "bot_password": "",
+    "bot_identity_secret": "",
+    "bot_shared_secret": "",
+    "mongoUrl": ""
+}

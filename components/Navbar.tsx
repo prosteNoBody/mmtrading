@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import Link from 'next/link';
 import styled from 'styled-components'
 
 const Container = styled.div`
+  position: relative;
   grid-area: navbar;
   display: flex;
   align-items: stretch;
@@ -11,6 +12,8 @@ const Container = styled.div`
   height: 100%;
 
   background: #222b3b;
+  
+  z-index: 2;
 `;
 
 const Section = styled.div`
@@ -36,14 +39,6 @@ const SectionProfile = styled(Section)`
   border-right: none;
 `;
 
-const SectionProfileArrow = styled.div`
-  margin: 1rem 0.5rem 1rem 0.5rem;
-  
-  transform-origin: center;
-  transform: rotate(${(props:Open) => (props.open ? '180deg' : '0deg')});
-  transition: transform 300ms;
-`;
-
 const SectionProfileImg = styled.img`
   border-radius: 50%;
   
@@ -61,12 +56,25 @@ const Profile = styled.div`
   user-select: none;
 `;
 
+const SectionProfileArrow = styled.div`
+  margin: ${(props:Open) => (props.open ? '1.5rem 1rem 1.5rem 1rem' : '1rem 0.5rem 1rem 0.5rem')};
+  
+  transform-origin: center;
+  transform: rotate(${(props:Open) => (props.open ? '180deg' : '0deg')}) scale(${(props:Open) => (props.open ? '1.1' : '1')});
+  transition: transform 300ms, margin 150ms ease-in;
+  
+  ${SectionProfile}:hover &{
+    margin: 1.5rem 1rem 1.5rem 1rem;
+    transform: rotate(${(props:Open) => (props.open ? '180deg' : '0deg')})  scale(1.1);
+  }
+`;
+
 interface Open{
     open?:boolean;
 }
 const ProfileInfo = styled.div`  
     position: absolute;
-    display: ${(props:Open) => (props.open ? 'flex' : 'none')};
+    display: flex;
     flex-direction: column;
     
     padding: 0.5rem 1rem;
@@ -75,7 +83,14 @@ const ProfileInfo = styled.div`
     
     background: dimgrey;
     
-    z-index: 2;
+    z-index: auto;
+    transform-origin: top;
+    transform: translateX(${(props:Open) => (props.open ? '0' : '20rem')});
+    transition: transform 400ms ease-out;
+`;
+const ProfileInfoTranslate = styled.div`
+    width: inherit;
+    
     transform: translate(-2rem,0.5rem);
 `;
 
@@ -90,10 +105,10 @@ const ProfileInfoItem = styled.div`
     background: black;
     color: lightgrey;
     
+    word-break: break-word;
+    text-align: center;
     font-weight: bold;
     text-transform: uppercase;
-    
-    user-select: text;
 `;
 
 const ProfileInfoItemLogout = styled(ProfileInfoItem)`
@@ -107,8 +122,11 @@ const ProfileInfoItemLogout = styled(ProfileInfoItem)`
   cursor: pointer;
 `;
 
-const Credit = styled.div`
-  color: gold;
+interface Color{
+    color?:string;
+}
+const CopyContent = styled.div`
+  color: ${(props: Color) => props.color ? props.color : 'black'};
   
   user-select: text;
 `;
@@ -121,9 +139,26 @@ type User = {
     persona:string;
     credit:number;
 }
+
+
 const Navbar: React.FC<Props> = (user) => {
     const {avatar,persona,credit} = user.user;
     const [isOpen,setIsOpen] = useState(false);
+    let node = null;
+
+    const callback = (e) => {
+        if(node && !node.contains(e.target)){
+            setIsOpen(false);
+        }
+    };
+    useEffect(() => {
+        document.body.addEventListener('click',callback);
+
+        return (() => {
+            document.body.removeEventListener('click',callback);
+        })
+    });
+
 
     return (
         <Container>
@@ -131,17 +166,19 @@ const Navbar: React.FC<Props> = (user) => {
             <Link href={"/dashboard"}><Section>Dashboard</Section></Link>
             <Link href={"/offers"}><Section>Offers</Section></Link>
             <Link href={"/faq"}><Section>F.A.Q.</Section></Link>
-            <Profile>
+            <Profile ref={element => node = element}>
                 <SectionProfile onClick={() => setIsOpen(!isOpen)}>
                     Profile
                     <SectionProfileArrow open={isOpen}><i aria-hidden className="fas fa-angle-down"/></SectionProfileArrow>
                     <SectionProfileImg alt="profile-picture" src={avatar}/>
                 </SectionProfile>
-                <ProfileInfo open={isOpen}>
-                    <ProfileInfoItem>{persona}</ProfileInfoItem>
-                    <ProfileInfoItem>Credit: <Credit>{credit}</Credit></ProfileInfoItem>
-                    <Link href={"/auth/logout"}><ProfileInfoItemLogout>Log Out</ProfileInfoItemLogout></Link>
-                </ProfileInfo>
+                <ProfileInfoTranslate>
+                    <ProfileInfo open={isOpen}>
+                        <ProfileInfoItem><CopyContent color={'lightblue'}>{persona}</CopyContent></ProfileInfoItem>
+                        <ProfileInfoItem>Credit: <CopyContent color={'gold'}>{credit}</CopyContent></ProfileInfoItem>
+                        <Link href={"/auth/logout"}><ProfileInfoItemLogout>Log Out</ProfileInfoItemLogout></Link>
+                    </ProfileInfo>
+                </ProfileInfoTranslate>
             </Profile>
         </Container>
     )

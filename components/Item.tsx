@@ -5,24 +5,32 @@ type ContainerProps = {
     rarity:string;
 }
 const Rarity = styled.div`
+  display: none;
   position: absolute;
   bottom: 0;
-  display: none;
+  
   padding: 0.2rem;
   width: 100%;
-  text-align: center;
-  user-select: none;
+  
   background: rgba(0,0,0,0.8);
   color: #${(props: ContainerProps) => props.rarity};
+  
+  text-align: center;
+  
+  user-select: none;
 `;
 const Container = styled.div`
   position: relative;
+  
   margin: 0.3rem;
-  overflow: hidden;
   border-radius: 1rem;
   height: max-content;
-  cursor: pointer;
+  
   border: 2px solid #${(props:ContainerProps) => props.rarity};
+  
+  cursor: pointer;
+  overflow: hidden;
+    
   &:hover ${Rarity}{
     display: block;
   }

@@ -1,19 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
+
 import Item from './Item';
+import LoadingIcon from './LoadingIcon';
 
 type ContainerProps = {
     gridSelector:string;
 }
 const Container = styled.div`
   grid-area: ${(props: ContainerProps) => props.gridSelector};
+  position: relative;
   
   border-radius: 2rem 0 0 2rem;
   padding: 1rem;
   max-height: 100%;
-  overflow-y: scroll;
   
   background: #222b3b;
+  
+  overflow-y: scroll;
   
   ::-webkit-scrollbar {
       width: 10px;
@@ -37,7 +41,7 @@ const ItemsContainer = styled.div`
 `;
 
 const InsideText = styled.div`
-  display:flex;
+  display: flex;
   flex-flow: column;
   justify-content: center;
   align-items: center;
@@ -50,6 +54,7 @@ const InsideText = styled.div`
   font-size: 200%;
   user-select: none;
 `;
+
 
 type Item = {
     index:number;
@@ -76,7 +81,7 @@ const OfferEditor: React.FC<Props> = (props) => {
     };
 
     const generateItems = () => {
-        if(isLoading) return <InsideText>Loading...</InsideText>;
+        if(isLoading) return <InsideText>Loading... <LoadingIcon/></InsideText>;
         if(error) return <InsideText>{error}</InsideText>;
         if(!items[0]) return <InsideText>No items...</InsideText>;
         return <ItemsContainer>{items.map(item => createItem(item,action))}</ItemsContainer>
