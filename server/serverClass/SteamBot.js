@@ -3,8 +3,6 @@ const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 
-const config = require('../keys');
-
 class Config {
     constructor(config) {
         this.bot_id = config.bot_id;
@@ -36,6 +34,9 @@ class SteamBot {
         this.client.on('loggedOn',() => {
             console.log(`Steam bot was successfully log in: ${this.config.bot_display_name} - ${this.config.bot_id}`);
         });
+        this.client.on('steamGuard', (domain,cb) => {
+            cb(SteamTotp.generateAuthCode(this.config.bot_shared_secret));
+        });
         this.client.on('webSession',(id,session) => {
             this.manager.setCookies(session);
             this.community.setCookies(session);
@@ -44,18 +45,17 @@ class SteamBot {
         });
     }
     getUserItems(steamid,cb){
-        let index = -1;
         this.manager.getUserInventoryContents(steamid,570,2,true, (err,inventory) => {
             if(!err){
                 inventory = inventory.map(item => {
-                    index++;
                     return{
-                        index: index,
+                        index: item.pos,
                         assetid:item.assetid,
                         name: item.market_name,
                         icon_url: item.getImageURL() + "200x200",
                         rarity: item.tags[1].name,
                         color: item.tags[1].color,
+                        descriptions: item.descriptions,
                     };
                 });
             }

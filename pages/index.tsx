@@ -1,7 +1,7 @@
 import Link from "next/link";
 import * as React from "react";
 
-function IndexPage() {
+const indexPage = () => {
   return (
       <div>
         <Link href={'/auth/login'}>
@@ -14,6 +14,6 @@ function IndexPage() {
         </Link>
       </div>
   );
-}
+};
 
-export default IndexPage;
+export default indexPage;

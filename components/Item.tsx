@@ -1,10 +1,18 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components'
 
+import LoadingIcon from "./LoadingIcon";
+
+
+const Container = styled.div`
+  position: relative;
+  
+  float: left;
+`;
 type ContainerProps = {
-    rarity:string;
+    rarityColor:string;
 }
-const Rarity = styled.div`
+const RarityImg = styled.div`
   display: none;
   position: absolute;
   bottom: 0;
@@ -12,45 +20,201 @@ const Rarity = styled.div`
   padding: 0.2rem;
   width: 100%;
   
-  background: rgba(0,0,0,0.8);
-  color: #${(props: ContainerProps) => props.rarity};
+  background: rgba(0,0,0,0.7);
+  color: #${(props: ContainerProps) => props.rarityColor};
   
   text-align: center;
   
   user-select: none;
 `;
-const Container = styled.div`
+const Rarity = styled.div`
+  color: #${(props: ContainerProps) => props.rarityColor};
+  font-size: 0.9rem;
+`;
+const Img = styled.img`
+  vertical-align: bottom;
+`;
+
+type ImgPlaceholderProps = {
+    display: boolean;
+}
+const ImgPlaceholder = styled.div`
+  display: ${(props:ImgPlaceholderProps) => (props.display ? "flex" : "none")};
+  justify-content: center;
+  align-items: center;
+
+  width: 120px;
+  height: 80px;
+  
+  background:grey;
+  color: whitesmoke;
+  
+  font-size: 1.5rem;
+  
+  &::after{
+      content: "";
+      position: absolute;
+      
+      width: 100%;
+      height: 100%;
+      
+      background: rgba(255, 255, 255, 0.2);
+      
+      opacity: 1;
+      
+      animation: shine 2s infinite ease-out;
+  }
+  
+  @keyframes shine{
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+`;
+const WrapHiddenOverflow = styled.div`
   position: relative;
   
   margin: 0.3rem;
-  border-radius: 1rem;
-  height: max-content;
+  border-radius: 0.5rem;
   
-  border: 2px solid #${(props:ContainerProps) => props.rarity};
+  border: 2px solid #${(props:ContainerProps) => props.rarityColor};
   
-  cursor: pointer;
   overflow: hidden;
-    
-  &:hover ${Rarity}{
+  cursor: pointer;
+  
+  &:hover ${RarityImg}{
     display: block;
   }
 `;
 
+type DetailsProps = {
+    color: string;
+};
+const Details = styled.div`
+  position: absolute;
+  left: -50%;
+  
+  width: 200%;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  
+  border: 3px solid #${(props:DetailsProps) => (props.color)};
+  background: #fff;
+  
+  text-align: center;
+  
+  z-index: 2;
+  transition: transform 200ms;
+  transform: translateY(20px) scale(0);
+  
+  ${WrapHiddenOverflow}:hover ~ &{
+    transform: translateY(20px) scale(1);
+    transition: transform 200ms 500ms;
+  }
+  &::before{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    
+    width: 0;
+    height: 0;
+    
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #${(props:DetailsProps) => (props.color)};
+    
+    transform: translateX(-50%);
+  }
+  &::after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    
+    width: 0;
+    height: 0;
+    
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid #fff;
+    
+    transform: translateX(-50%);
+  }
+`;
+const Divider = styled.div`
+  width: 100%;
+  margin: 1rem 0;
+  
+  border-top:1px solid #1e1e1e;
+`;
+const NameTitle = styled.div`
+  font-weight: bold;
+  font-size: 1.1rem;
+`;
+const Description = styled.div`
+  margin: 0.3rem 0;
+  
+  color: #${(props: ContainerProps) => props.rarityColor};
+  
+  font-size: 0.8rem;
+`;
+const LoadingI = styled.i`
+  animation: rotate 1.5s infinite ease-in-out;
+  
+  @keyframes rotate{
+    0%{
+        transform: rotate(0deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+  }
+`;
+
+type Description = {
+    type: string;
+    value: string;
+    color?: string;
+}
 type Props = {
     assetid: number;
-    image: string;
+    imageUrl: string;
     name: string;
     rarity: string;
     color: string;
+    descriptions: Description[];
     action:(id:number) => void;
 }
 const Item: React.FC<Props> = (props) => {
-    const {assetid,name,rarity,image,color,action} = props;
+    const {assetid,name,rarity,imageUrl,color,descriptions,action} = props;
+
+    const createDescriptions = (descriptions) => {
+        return descriptions.map((description:Description) => {
+            return <Description rarityColor={description.color} dangerouslySetInnerHTML={{__html:description.value}}/>
+        });
+    };
 
     return (
-        <Container rarity={color} onClick={() => action(assetid)}>
-            <img width="120px" alt={'item'} src={image}/>
-            <Rarity rarity={color}>{rarity}</Rarity>
+        <Container>
+            <WrapHiddenOverflow rarityColor={color} onClick={() => action(assetid)}>
+                <Img width="120px" height="80px" alt={'item'} src={imageUrl}/>
+                {/*<ImgPlaceholder display={loadingImg}><LoadingI aria-hidden className="fas fa-hat-wizard"/></ImgPlaceholder>*/}
+                <RarityImg rarityColor={color}>{rarity}</RarityImg>
+            </WrapHiddenOverflow>
+            <Details color={color}>
+                <NameTitle>{name}</NameTitle>
+                <Divider/>
+                <Rarity rarityColor={color}>{rarity}</Rarity>
+                <Divider/>
+                <div>{createDescriptions(descriptions)}</div>
+            </Details>
         </Container>
     )
 };

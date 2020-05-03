@@ -21,7 +21,7 @@ const Container = styled.div`
   "offer-manager";
 `;
 
-function dashboard(props){
+const dashboard = (props) => {
     const {user} = props;
     return (
         <Container>
@@ -32,7 +32,7 @@ function dashboard(props){
             <OfferEditor/>
         </Container>
     );
-}
+};
 
 interface ReqUser extends IncomingMessage{
     user?:User;

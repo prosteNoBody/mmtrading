@@ -9,7 +9,6 @@ type ContainerProps = {
 }
 const Container = styled.div`
   grid-area: ${(props: ContainerProps) => props.gridSelector};
-  position: relative;
   
   border-radius: 2rem 0 0 2rem;
   padding: 1rem;
@@ -18,6 +17,7 @@ const Container = styled.div`
   background: #222b3b;
   
   overflow-y: scroll;
+  overflow-x: hidden;
   
   ::-webkit-scrollbar {
       width: 10px;
@@ -55,7 +55,11 @@ const InsideText = styled.div`
   user-select: none;
 `;
 
-
+type Description = {
+    type: string;
+    value: string;
+    color?: string;
+}
 type Item = {
     index:number;
     assetid: number;
@@ -63,6 +67,7 @@ type Item = {
     icon_url: string;
     rarity: string;
     color: string;
+    descriptions: Description[];
 }
 type Props = {
     isLoading?: boolean;
@@ -77,7 +82,7 @@ const OfferEditor: React.FC<Props> = (props) => {
     const error = props.error || false;
 
     const createItem = (item:Item,action) => {
-        return <Item key={item.assetid} assetid={item.assetid} image={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} action={action}/>
+        return <Item key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action}/>
     };
 
     const generateItems = () => {

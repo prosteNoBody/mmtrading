@@ -19,6 +19,11 @@ const Container = styled.div`
   
   background: yellowgreen;
 `;
+type Description = {
+    type: string;
+    value: string;
+    color?: string;
+}
 
 type Item = {
     index:number;
@@ -27,6 +32,7 @@ type Item = {
     icon_url: string;
     rarity: string;
     color: string;
+    descriptions: Description[];
 }
 type Data = {
     inventory?:Item[];
@@ -38,7 +44,7 @@ const OfferEditor: React.FC = () => {
     const [refresh,setRefresh] = useState(true);
 
     const [inventory,setInventory] = useState<Item[]>([]);
-    const [inventoryItems,setInvetoryItems] = useState<Item[]>([]);
+    const [inventoryItems,setInventoryItems] = useState<Item[]>([]);
     const [offerItems,setOfferItems] = useState<Item[]>([]);
 
     useEffect(() => {
@@ -52,7 +58,7 @@ const OfferEditor: React.FC = () => {
                         setError(error);
                     }else{
                         setInventory(sortItems(inventory));
-                        setInvetoryItems(sortItems(inventory));
+                        setInventoryItems(sortItems(inventory));
                     }
                 }
             })
@@ -77,27 +83,27 @@ const OfferEditor: React.FC = () => {
     const refreshItems = () => {
         setLoading(true);
         setOfferItems([]);
-        setInvetoryItems([]);
+        setInventoryItems([]);
         setInventory([]);
 
         setError("");
         setRefresh(!refresh);
     };
     const emptyInventory = () => {
-        setInvetoryItems([]);
+        setInventoryItems([]);
         setOfferItems([...inventory]);
     };
     const emptyOffer = () => {
         setOfferItems([]);
-        setInvetoryItems([...inventory]);
+        setInventoryItems([...inventory]);
     };
 
     const moveToOffer = (id:number) => {
         setOfferItems([...inventory.filter(item => item.assetid === id),...offerItems]);
-        setInvetoryItems(inventoryItems.filter(item => item.assetid !== id));
+        setInventoryItems(inventoryItems.filter(item => item.assetid !== id));
     };
     const moveToInventory = (id:number) => {
-        setInvetoryItems(sortItems([...inventory.filter(item => item.assetid === id),...inventoryItems]));
+        setInventoryItems(sortItems([...inventory.filter(item => item.assetid === id),...inventoryItems]));
         setOfferItems(offerItems.filter(item => item.assetid !== id));
     };
 

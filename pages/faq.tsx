@@ -1,7 +1,7 @@
 import Link from "next/link";
 import * as React from "react";
 
-function Faq(){
+const faq = () => {
     return (
         <div>
             To be done!
@@ -10,6 +10,6 @@ function Faq(){
             </Link>
         </div>
     );
-}
+};
 
-export default Faq;
+export default faq;
