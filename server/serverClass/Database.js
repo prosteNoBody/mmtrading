@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const User = require("../models/User");
 
 
 class Config {
@@ -16,7 +15,7 @@ class Database{
         this.config = new Config(config);
         mongoose.connect(this.config.dbUrl,{useUnifiedTopology: true,useNewUrlParser: true})
         .then(()=>{
-            console.log("Succesfully connected to DB.");
+            console.log("Successfully connected to DB.");
             this.isConnected = true;
         })
         .catch(e=>{

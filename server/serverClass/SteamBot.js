@@ -45,8 +45,10 @@ class SteamBot {
         });
     }
     getUserItems(steamid,cb){
-        this.manager.getUserInventoryContents(steamid,570,2,true, (err,inventory) => {
-            if(!err){
+        this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
+            if(error)
+                error = "File could not be loaded, your profile may be private!";
+            if(!error){
                 inventory = inventory.map(item => {
                     return{
                         index: item.pos,
@@ -59,7 +61,27 @@ class SteamBot {
                     };
                 });
             }
-            cb(err,inventory);
+            cb(error,inventory);
+        });
+    }
+    getUserItemsGraphql(steamid,cb){
+        this.manager.getUserInventoryContents(steamid,570,2,true, (error,items) => {
+            if(error)
+                error = "File could not be loaded, your profile may be private!";
+            if(!error){
+                items = items.map(item => {
+                    return{
+                        index: item.pos,
+                        assetid:item.assetid,
+                        name: item.market_name,
+                        icon_url: item.getImageURL() + "200x200",
+                        rarity: item.tags[1].name,
+                        color: item.tags[1].color,
+                        descriptions: item.descriptions,
+                    };
+                });
+            }
+            cb(error,items);
         });
     }
 }

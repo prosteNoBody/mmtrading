@@ -1,10 +1,12 @@
 const express = require("express");
 const session = require("express-session");
+const expressGraphQL = require('express-graphql');
 const next = require("next");
 
 const Auth = require("./serverClass/Auth");
 const SteamBot = require("./serverClass/SteamBot");
 const Database = require("./serverClass/Database");
+const GraphqlApi = require('./schemes/GraphqlApi');
 const config = require("./keys");
 
 const port = parseInt(process.env.PORT, 10) || 3000;
@@ -17,6 +19,7 @@ const mainPage = "/dashboard";
 
 const bot = new SteamBot(config);
 const db = new Database(config);
+const graphqlApi = new GraphqlApi(bot);
 const auth = new Auth(indexPage, mainPage);
 
 auth.setup();
@@ -34,10 +37,24 @@ app.prepare().then(() => {
     }));
     auth.initialize(server);
 
+    server.get(/^\/auth\/((login)|(return))$/, auth.authenticate(), (req, res) => {
+        res.redirect(mainPage);
+    });
+
+    server.get('/auth/logout', (req, res) => {
+        req.logout();
+        res.redirect(indexPage);
+    });
+
+    server.all('/api/auth/graphql',auth.apiIsAuth,expressGraphQL({
+        graphiql: true,
+        schema: graphqlApi.getAuthRootQuery()
+    }));
+
     server.get('/api/inventory', auth.apiIsAuth, (req, res) => {
-        bot.getUserItems(req.user.steamid, (err, inventory) => {
-            if (err) {
-                res.send({ error: "File could not be loaded, your profile may be private!" });
+        bot.getUserItems(req.user.steamid, (error, inventory) => {
+            if (error) {
+                res.send({ error: error });
             } else {
                 res.send({inventory});
             }
@@ -46,15 +63,6 @@ app.prepare().then(() => {
 
     server.get(mainPage, auth.isAuth, (req, res) => {
         app.render(req, res, mainPage).then();
-    });
-
-    server.get(/^\/auth\/((login)|(return))$/, auth.authenticate(), (req, res) => {
-        res.redirect(mainPage);
-    });
-
-    server.get('/auth/logout', (req, res) => {
-        req.logout();
-        res.redirect(indexPage);
     });
 
     server.get('/', auth.isNotAuth);
