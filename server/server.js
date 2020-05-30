@@ -46,11 +46,6 @@ app.prepare().then(() => {
         res.redirect(indexPage);
     });
 
-    server.all('/api/auth/graphql',auth.apiIsAuth,expressGraphQL({
-        graphiql: true,
-        schema: graphqlApi.getAuthRootQuery()
-    }));
-
     server.get('/api/inventory', auth.apiIsAuth, (req, res) => {
         bot.getUserItems(req.user.steamid, (error, inventory) => {
             if (error) {
@@ -61,11 +56,10 @@ app.prepare().then(() => {
         })
     });
 
-    server.get(mainPage, auth.isAuth, (req, res) => {
-        app.render(req, res, mainPage).then();
-    });
-
-    server.get('/', auth.isNotAuth);
+    server.all('/api',auth.apiIsAuth,expressGraphQL({
+        graphiql: false,
+        schema: graphqlApi.getAuthRootQuery()
+    }));
 
     server.all('*', (req, res) => {
         return handle(req, res)

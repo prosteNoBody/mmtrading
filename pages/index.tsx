@@ -1,19 +1,63 @@
-import Link from "next/link";
 import * as React from "react";
+import styled from "styled-components";
+import Head from "next/dist/next-server/lib/head";
 
-const indexPage = () => {
-  return (
-      <div>
-        <Link href={'/auth/login'}>
-          <a>
-              <img alt="login button" src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_01.png" width="180" height="35"/>
-          </a>
-        </Link>
-        <Link href={'/faq'}>
-          <a>FAQ</a>
-        </Link>
-      </div>
-  );
+import Navbar from "../components/Navbar";
+import { GetServerSideProps } from 'next'
+import {IncomingMessage} from "http";
+
+const Container = styled.div`
+  display:grid;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  
+  grid-template-columns: 100vw;
+  grid-template-rows: 5.5rem calc(100vh - 5.5rem);
+  grid-template-areas:
+  "navbar"
+  "offer-manager";
+`;
+
+type Props = {
+    user?: User;
+}
+const indexPage = (props:Props) => {
+    const {user} = props;
+    return (
+        <Container>
+            <Head>
+                <title>MMTrading</title>
+            </Head>
+            <Navbar user={user}/>
+        </Container>
+    );
+};
+
+interface ReqUser extends IncomingMessage{
+    user?:User;
+}
+type User = {
+    name:string;
+    avatar:string;
+    credit:number;
+}
+
+export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}) =>{
+    if(req.user){
+        return {
+            props:{
+                user:{
+                    persona: req.user.name,
+                    avatar: req.user.avatar,
+                    credit: req.user.credit,
+                }
+            }
+        };
+    }
+    return {
+        props: {}
+    };
 };
 
 export default indexPage;

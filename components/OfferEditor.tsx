@@ -4,20 +4,21 @@ import axios from 'axios';
 
 import ItemsManager from './ItemsManager';
 import ControlsManager from './ControlsManager';
+import OfferSubmitter from './OfferSubmitter';
 
 const Container = styled.div`
   grid-area: offer-manager;
   display: grid;
   grid-template-columns: 1fr 8rem 1fr;
-  grid-template-rows: auto 6rem 12rem;
+  grid-template-rows: 3fr 20rem;
   grid-template-areas:
   "inventory controls offer"
-  "inventory controls form"
   "inventory preview preview";
   
-  padding: 1rem;
+  padding: 2rem;
   
-  background: yellowgreen;
+  background: rgb(247,247,247);
+  background: radial-gradient(circle, rgba(247,247,247,1) 0%, rgba(230,230,230,1) 100%);
 `;
 type Description = {
     type: string;
@@ -34,11 +35,23 @@ type Item = {
     color: string;
     descriptions: Description[];
 }
-type Data = {
-    inventory?:Item[];
-    error?:string;
+
+type RespondData = {
+    data: {
+        error?:string;
+        inventory?: {
+            error?: string,
+            items: Item[]
+        };
+    };
 }
-const OfferEditor: React.FC = () => {
+
+type Props = {
+    persona: string;
+    avatar: string;
+}
+const OfferEditor: React.FC<Props> = (props) => {
+    const {persona,avatar} = props;
     const [loading,setLoading] = useState(true);
     const [error,setError] = useState("");
     const [refresh,setRefresh] = useState(true);
@@ -47,18 +60,50 @@ const OfferEditor: React.FC = () => {
     const [inventoryItems,setInventoryItems] = useState<Item[]>([]);
     const [offerItems,setOfferItems] = useState<Item[]>([]);
 
+    // useEffect(() => {
+    //     const script = document.createElement('script');
+    //     script.src = "/test.js";
+    //     document.body.appendChild(script);
+    // },[]);
+
     useEffect(() => {
         setLoading(true);
         let unmounted = false;
-        axios.get<Data>('http://localhost:3000/api/inventory')
-            .then( ({data}) => {
-                const {error,inventory} = data;
+        axios.post<RespondData>('http://localhost:3000/api',{
+            query:`
+                {
+                    inventory{
+                        error
+                        items{
+                            index
+                            assetid
+                            name
+                            icon_url
+                            rarity
+                            color
+                            descriptions{
+                                type
+                                value
+                                color
+                            }
+                        }
+                    }
+                }
+            `
+        })
+            .then( (respond) => {
+                const {data} = respond.data;
                 if(!unmounted){
-                    if(error){
-                        setError(error);
+                    if(data.error){
+                        setError(data.error);
                     }else{
-                        setInventory(sortItems(inventory));
-                        setInventoryItems(sortItems(inventory));
+                        if(data.inventory.error){
+                            setError(data.inventory.error);
+                        }
+                        else{
+                            setInventory(sortItems(data.inventory.items));
+                            setInventoryItems(sortItems(data.inventory.items));
+                        }
                     }
                 }
             })
@@ -109,9 +154,10 @@ const OfferEditor: React.FC = () => {
 
     return (
         <Container>
-            <ItemsManager isLoading={loading} error={error} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'}/>
-            <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'}/>
+            <ItemsManager isLoading={loading} error={error} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true}/>
+            <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true}/>
             <ControlsManager refreshAction={refreshItems} emptyAction={emptyOffer} fullAction={emptyInventory}/>
+            <OfferSubmitter items={offerItems} persona={persona} avatar={avatar}/>
         </Container>
     );
 };

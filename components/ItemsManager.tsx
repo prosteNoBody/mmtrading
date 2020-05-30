@@ -10,12 +10,13 @@ type ContainerProps = {
 const Container = styled.div`
   grid-area: ${(props: ContainerProps) => props.gridSelector};
   
-  border-radius: 2rem 0 0 2rem;
   padding: 1rem;
   max-height: 100%;
   
-  background: #222b3b;
+  background: rgb(28,28,28);
+  background: radial-gradient(circle, rgba(45,45,45,1) 0%, rgba(28,28,28,1) 100%);
   
+  filter: drop-shadow(0 0 .75rem grey);
   overflow-y: scroll;
   overflow-x: hidden;
   
@@ -75,14 +76,15 @@ type Props = {
     items:Item[];
     action:(id:number) => void;
     gridSelector: string;
+    createDescriptions: boolean;
 }
 const OfferEditor: React.FC<Props> = (props) => {
-    const {items,action,gridSelector} = props;
+    const {items,action,gridSelector, createDescriptions} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
     const createItem = (item:Item,action) => {
-        return <Item key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action}/>
+        return <Item createDescription={createDescriptions} key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action}/>
     };
 
     const generateItems = () => {

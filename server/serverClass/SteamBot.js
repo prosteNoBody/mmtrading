@@ -44,7 +44,7 @@ class SteamBot {
             //this.community.startConfirmationChecker(30000,this.config.bot_identity_secret);
         });
     }
-    getUserItems(steamid,cb){
+    getUserItems = (steamid,cb) => {
         this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
             if(error)
                 error = "File could not be loaded, your profile may be private!";
@@ -57,19 +57,20 @@ class SteamBot {
                         icon_url: item.getImageURL() + "200x200",
                         rarity: item.tags[1].name,
                         color: item.tags[1].color,
-                        descriptions: item.descriptions,
                     };
                 });
             }
             cb(error,inventory);
         });
-    }
-    getUserItemsGraphql(steamid,cb){
-        this.manager.getUserInventoryContents(steamid,570,2,true, (error,items) => {
-            if(error)
-                error = "File could not be loaded, your profile may be private!";
-            if(!error){
-                items = items.map(item => {
+    };
+    GraphQLGetUserItems = async (steamid) => {
+        return new Promise((resolve, reject) => {
+            this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
+                if(error || typeof inventory === 'undefined')
+                    reject(error);
+                inventory = inventory.map(item => {
+                    if(item.descriptions.length)
+                        item.descriptions = [{type:"html",value:"No Descriptions"}];
                     return{
                         index: item.pos,
                         assetid:item.assetid,
@@ -80,10 +81,10 @@ class SteamBot {
                         descriptions: item.descriptions,
                     };
                 });
-            }
-            cb(error,items);
+                resolve(inventory);
+            })
         });
-    }
+    };
 }
 
 module.exports = SteamBot;

@@ -1,9 +1,6 @@
 import React, {useState} from 'react';
 import styled from 'styled-components'
 
-import LoadingIcon from "./LoadingIcon";
-
-
 const Container = styled.div`
   position: relative;
   
@@ -12,6 +9,26 @@ const Container = styled.div`
 type ContainerProps = {
     rarityColor:string;
 }
+type MouseIconProps = {
+    img: string;
+}
+const MouseIcon = styled.div`
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  
+  margin: 5px;
+  border-radius: 50%;
+  
+  border: 1px solid var(--color-white)AA;
+  background-color: var(--color-white);
+  -webkit-mask: url(${(props:MouseIconProps) => (props.img)}) no-repeat center;
+  mask: url(${(props:MouseIconProps) => (props.img)}) no-repeat center;
+  
+  height: 35px;
+  width: 25px;
+`;
 const RarityImg = styled.div`
   display: none;
   position: absolute;
@@ -81,7 +98,9 @@ const WrapHiddenOverflow = styled.div`
   position: relative;
   
   margin: 0.3rem;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem;  
+  width: 120px;
+  height: 80px;
   
   border: 2px solid #${(props:ContainerProps) => props.rarityColor};
   
@@ -89,6 +108,9 @@ const WrapHiddenOverflow = styled.div`
   cursor: pointer;
   
   &:hover ${RarityImg}{
+    display: block;
+  }
+  &:hover ${MouseIcon}{
     display: block;
   }
 `;
@@ -191,14 +213,28 @@ type Props = {
     color: string;
     descriptions: Description[];
     action:(id:number) => void;
+    createDescription: boolean;
 }
 const Item: React.FC<Props> = (props) => {
-    const {assetid,name,rarity,imageUrl,color,descriptions,action} = props;
+    const {assetid,name,rarity,imageUrl,color,descriptions,action,createDescription} = props;
 
     const createDescriptions = (descriptions) => {
-        return descriptions.map((description:Description) => {
-            return <Description rarityColor={description.color} dangerouslySetInnerHTML={{__html:description.value}}/>
+        return descriptions.map((description:Description,index:number) => {
+            return <Description key={assetid + index} rarityColor={description.color} dangerouslySetInnerHTML={{__html:description.value}}/>
         });
+    };
+    const createDetails = () => {
+        if(!createDescription)
+            return;
+        return (
+            <Details color={color}>
+                <NameTitle>{name}</NameTitle>
+                <Divider/>
+                <Rarity rarityColor={color}>{rarity}</Rarity>
+                <Divider/>
+                <div>{createDescriptions(descriptions)}</div>
+            </Details>
+        )
     };
 
     return (
@@ -207,14 +243,9 @@ const Item: React.FC<Props> = (props) => {
                 <Img width="120px" height="80px" alt={'item'} src={imageUrl}/>
                 {/*<ImgPlaceholder display={loadingImg}><LoadingI aria-hidden className="fas fa-hat-wizard"/></ImgPlaceholder>*/}
                 <RarityImg rarityColor={color}>{rarity}</RarityImg>
+                <MouseIcon img="/mouseIcon.svg"/>
             </WrapHiddenOverflow>
-            <Details color={color}>
-                <NameTitle>{name}</NameTitle>
-                <Divider/>
-                <Rarity rarityColor={color}>{rarity}</Rarity>
-                <Divider/>
-                <div>{createDescriptions(descriptions)}</div>
-            </Details>
+            {createDetails()}
         </Container>
     )
 };

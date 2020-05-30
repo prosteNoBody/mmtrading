@@ -61,7 +61,7 @@ class Auth{
         if(req.user){
             next();
         }else{
-            res.send({error:"You are required to be logged in! Please login first."});
+            res.send({data:{error:"You are required to be logged in! Please re/login first."}});
         }
     };
     isAuth = (req,res,next) => {

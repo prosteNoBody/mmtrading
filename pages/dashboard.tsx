@@ -15,21 +15,26 @@ const Container = styled.div`
   max-height: 100vh;
   
   grid-template-columns: 100vw;
-  grid-template-rows: 5rem calc(100vh - 5rem);
+  grid-template-rows: 5.5rem calc(100vh - 5.5rem);
   grid-template-areas:
   "navbar"
   "offer-manager";
 `;
 
-const dashboard = (props) => {
+type Props = {
+    user?: User;
+}
+const dashboard = (props:Props) => {
     const {user} = props;
+    const avatar = user ? user.avatar : "";
+    const persona = user ? user.name : "";
     return (
         <Container>
             <Head>
                 <title>MMTrading | Dashboard</title>
             </Head>
             <Navbar user={user}/>
-            <OfferEditor/>
+            <OfferEditor avatar={avatar} persona={persona}/>
         </Container>
     );
 };
@@ -48,12 +53,15 @@ export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}
         return {
             props:{
                 user:{
-                    persona: req.user.name,
+                    name: req.user.name,
                     avatar: req.user.avatar,
                     credit: req.user.credit,
                 }
             }
         };
     }
+    return {
+        props: {}
+    };
 };
 export default dashboard;

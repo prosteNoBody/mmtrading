@@ -6,6 +6,17 @@
     margin: 0;
     box-sizing: border-box;
 }
+/*https://coolors.co/ade55c-eb4b4b-e4ae39-d32ce6-8847ff-4b69ff-f7f7f7-1c1c1c*/
+:root {
+    --color-white: #F7F7F7;
+    --color-black: #1C1C1C;
+    --color-arcana: #ADE55C;
+    --color-ancient: #EB4B4B;
+    --color-immortal: #E4AE39;
+    --color-legendary: #D32CE6;
+    --color-mythical: #8847FF;
+    --color-rare: #4B69FF;
+}
 
 body {
     margin: 0;

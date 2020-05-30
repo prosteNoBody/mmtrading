@@ -10,17 +10,27 @@ class GraphqlApi {
     constructor(steamBot){
         this.steamBot = steamBot;
 
+        this.DescriptionType = new GraphQLObjectType({
+            name: 'Description',
+            description: 'Description of item',
+            fields: () => ({
+                type: {type: GraphQLString},
+                value: {type: GraphQLString},
+                color: {type: GraphQLString},
+            })
+        });
+
         this.ItemType = new GraphQLObjectType({
             name: 'Item',
             description: 'Represent item from inventory.',
             fields: () => ({
                 index: {type: GraphQLInt},
-                assetid: {type: GraphQLInt},
+                assetid: {type: GraphQLString},
                 name: {type: GraphQLString},
                 icon_url: {type: GraphQLString},
                 rarity: {type: GraphQLString},
                 color: {type: GraphQLString},
-                descriptions: {type: GraphQLList(GraphQLString)}
+                descriptions: {type: GraphQLList(this.DescriptionType)},
             })
         });
 
@@ -41,17 +51,17 @@ class GraphqlApi {
                     type: this.InventoryType,
                     descriptions: 'Result inventory data',
                     resolve: (parent, args, req) => {
-                        this.steamBot.getUserItemsGraphql(req.user.steamid,(error,items) => {
-                            return {
-                                error:error,
-                                items:items,
-                            }
-                        })
+                        return this.steamBot.GraphQLGetUserItems(req.user.steamid).then(items => {
+                            return {items: items};
+                        }).catch(error => {
+                            return {error: error};
+                        });
                     }
                 }
             })
         })
     }
+
     getAuthRootQuery = () => {
         return new GraphQLSchema({
             query: this.RootAuthQueryType,
