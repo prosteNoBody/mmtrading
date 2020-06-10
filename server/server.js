@@ -56,8 +56,8 @@ app.prepare().then(() => {
         })
     });
 
-    server.all('/api',auth.apiIsAuth,expressGraphQL({
-        graphiql: false,
+    server.all('/api', expressGraphQL({
+        graphiql: true,
         schema: graphqlApi.getAuthRootQuery()
     }));
 

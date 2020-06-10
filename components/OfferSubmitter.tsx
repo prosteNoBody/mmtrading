@@ -1,9 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components'
 
 import ItemManager from './ItemsManager';
 import PriceEditor from './PriceEditor';
-import CopyLink from "./CopyLink";
 
 const Container = styled.div`
   grid-area: preview;
@@ -21,7 +20,7 @@ const SemiContainer = styled.div`
   grid-template-areas:
   "inventory profile"
   "inventory price"
-  "link submit";
+  "inventory submit";
 
   width: 100%;
   height: 100%;
@@ -34,7 +33,7 @@ const ProfileInfoWrapper = styled.div`
   position: relative;
   grid-area: profile;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   
   margin: 1rem;
@@ -63,6 +62,7 @@ const ProfileImgWrapper = styled.div`
   justify-content: center;
   align-items: center;
   
+  margin-left: 1rem;
   height: 3rem;
   width: 3rem;
   border-radius: 50%;
@@ -115,7 +115,6 @@ type Props = {
 }
 const OfferSubmitter: React.FC<Props> = (props) => {
     const {items,avatar,persona} = props;
-    const link = props.link || "Link will be created after submitting";
     const [price,setPrice] = useState(0);
 
     const editPrice = (event) => {
@@ -141,7 +140,6 @@ const OfferSubmitter: React.FC<Props> = (props) => {
                 {generateProfileInfo(avatar,persona)}
                 <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false}/>
                 <PriceEditor price={price ? price : ""} editPrice={editPrice}/>
-                <CopyLink link={link} />
                 <SubmitButton>SUBMIT</SubmitButton>
             </SemiContainer>
         </Container>

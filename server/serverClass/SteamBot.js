@@ -69,7 +69,7 @@ class SteamBot {
                 if(error || typeof inventory === 'undefined')
                     reject(error);
                 inventory = inventory.map(item => {
-                    if(item.descriptions.length)
+                    if(!item.descriptions.length)
                         item.descriptions = [{type:"html",value:"No Descriptions"}];
                     return{
                         index: item.pos,

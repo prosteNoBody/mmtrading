@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
+
+import {useQuery} from "@apollo/react-hooks";
+import {gql} from 'apollo-boost';
 
 import ItemsManager from './ItemsManager';
 import ControlsManager from './ControlsManager';
@@ -37,12 +39,9 @@ type Item = {
 }
 
 type RespondData = {
-    data: {
-        error?:string;
-        inventory?: {
-            error?: string,
-            items: Item[]
-        };
+    inventory?: {
+        error?: string,
+        items: Item[]
     };
 }
 
@@ -50,89 +49,55 @@ type Props = {
     persona: string;
     avatar: string;
 }
+const ITEM_REQUEST = gql`
+        {
+            inventory{
+                error
+                items{
+                    index
+                    assetid
+                    name
+                    icon_url
+                    rarity
+                    color
+                    descriptions{
+                        type
+                        value
+                    }
+                }
+            }
+        }`;
 const OfferEditor: React.FC<Props> = (props) => {
     const {persona,avatar} = props;
-    const [loading,setLoading] = useState(true);
-    const [error,setError] = useState("");
-    const [refresh,setRefresh] = useState(true);
+    const [errorMessage,setErrorMessage] = useState("");
 
     const [inventory,setInventory] = useState<Item[]>([]);
     const [inventoryItems,setInventoryItems] = useState<Item[]>([]);
     const [offerItems,setOfferItems] = useState<Item[]>([]);
 
-    // useEffect(() => {
-    //     const script = document.createElement('script');
-    //     script.src = "/test.js";
-    //     document.body.appendChild(script);
-    // },[]);
+    const {loading, error, data, refetch} = useQuery<RespondData>(ITEM_REQUEST,{fetchPolicy: 'cache-and-network'});
 
     useEffect(() => {
-        setLoading(true);
-        let unmounted = false;
-        axios.post<RespondData>('http://localhost:3000/api',{
-            query:`
-                {
-                    inventory{
-                        error
-                        items{
-                            index
-                            assetid
-                            name
-                            icon_url
-                            rarity
-                            color
-                            descriptions{
-                                type
-                                value
-                                color
-                            }
-                        }
-                    }
-                }
-            `
-        })
-            .then( (respond) => {
-                const {data} = respond.data;
-                if(!unmounted){
-                    if(data.error){
-                        setError(data.error);
-                    }else{
-                        if(data.inventory.error){
-                            setError(data.inventory.error);
-                        }
-                        else{
-                            setInventory(sortItems(data.inventory.items));
-                            setInventoryItems(sortItems(data.inventory.items));
-                        }
-                    }
-                }
-            })
-            .catch(e=>{
-                console.log(e);
-                if(!unmounted){
-                    setError("We are unable to contact server.");
-                }
-            })
-            .finally(()=>{
-                if(!unmounted){
-                    setLoading(false);
-                }
-            });
-        return () => {unmounted = true};
-    },[refresh]);
-
+        if(error)
+            setErrorMessage("We were unable to get inventory data from server.");
+        if(data){
+            // if(data.error)
+            //     setErrorMessage(data.error);
+            if(data.inventory.error)
+                setErrorMessage(data.inventory.error);
+            if(data.inventory.items){
+                setInventory(data.inventory.items);
+                setInventoryItems(data.inventory.items);
+                setOfferItems([]);
+            }
+        }
+    },[error,data]);
 
     const sortItems = (array:Item[]) => {
         return array.sort((itemA,itemB)=>(itemA.index < itemB.index) ? 1 : -1);
     };
     const refreshItems = () => {
-        setLoading(true);
-        setOfferItems([]);
-        setInventoryItems([]);
-        setInventory([]);
-
-        setError("");
-        setRefresh(!refresh);
+        refetch().then();
     };
     const emptyInventory = () => {
         setInventoryItems([]);
@@ -154,7 +119,7 @@ const OfferEditor: React.FC<Props> = (props) => {
 
     return (
         <Container>
-            <ItemsManager isLoading={loading} error={error} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true}/>
+            <ItemsManager isLoading={loading} error={errorMessage} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true}/>
             <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true}/>
             <ControlsManager refreshAction={refreshItems} emptyAction={emptyOffer} fullAction={emptyInventory}/>
             <OfferSubmitter items={offerItems} persona={persona} avatar={avatar}/>

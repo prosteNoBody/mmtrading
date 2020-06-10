@@ -51,6 +51,7 @@ class GraphqlApi {
                     type: this.InventoryType,
                     descriptions: 'Result inventory data',
                     resolve: (parent, args, req) => {
+                        if(!req.user) return {error:"You are required to be logged in! Please re/login first."};
                         return this.steamBot.GraphQLGetUserItems(req.user.steamid).then(items => {
                             return {items: items};
                         }).catch(error => {
