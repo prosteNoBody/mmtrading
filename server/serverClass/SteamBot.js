@@ -65,9 +65,10 @@ class SteamBot {
     };
     GraphQLGetUserItems = async (steamid) => {
         return new Promise((resolve, reject) => {
-            this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
-                if(error || typeof inventory === 'undefined')
-                    reject(error);
+            this.manager.getUserInventoryContents(steamid,570,2,false, (error,inventory) => {
+                if(error || typeof inventory == 'undefined'){
+                    return reject(error);
+                }
                 inventory = inventory.map(item => {
                     if(!item.descriptions.length)
                         item.descriptions = [{type:"html",value:"No Descriptions"}];
@@ -81,7 +82,7 @@ class SteamBot {
                         descriptions: item.descriptions,
                     };
                 });
-                resolve(inventory);
+                return resolve(inventory);
             })
         });
     };

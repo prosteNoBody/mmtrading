@@ -82,8 +82,9 @@ const SubmitButton = styled.div`
   padding: .5rem;
   border-radius: 1rem;
   
-  background: var(--color-immortal);
+  background: grey;
   color: var(--color-white);
+  box-shadow:inset 0 0 10px #AAAAAA;
   
   font-size: 1.5rem;
   font-weight: bold;

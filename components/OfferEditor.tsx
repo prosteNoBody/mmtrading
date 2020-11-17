@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
+import ItemsManagerPaged from "./ItemsManagerPaged";
 import ItemsManager from './ItemsManager';
 import ControlsManager from './ControlsManager';
 import OfferSubmitter from './OfferSubmitter';
@@ -97,6 +98,7 @@ const OfferEditor: React.FC<Props> = (props) => {
         return array.sort((itemA,itemB)=>(itemA.index < itemB.index) ? 1 : -1);
     };
     const refreshItems = () => {
+        setOfferItems([]);
         refetch().then();
     };
     const emptyInventory = () => {
@@ -119,7 +121,7 @@ const OfferEditor: React.FC<Props> = (props) => {
 
     return (
         <Container>
-            <ItemsManager isLoading={loading} error={errorMessage} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true}/>
+            <ItemsManagerPaged isLoading={loading} error={errorMessage} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true} itemsPerPage={100}/>
             <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true}/>
             <ControlsManager refreshAction={refreshItems} emptyAction={emptyOffer} fullAction={emptyInventory}/>
             <OfferSubmitter items={offerItems} persona={persona} avatar={avatar}/>

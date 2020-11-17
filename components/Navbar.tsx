@@ -27,8 +27,7 @@ const SteamLoginWrapper = styled.div`
   
   margin-left: auto;
   margin-right: 2rem;
-`;
-const PointerCursorWrapper = styled.div`
+  
   cursor: pointer;
 `;
 
@@ -52,9 +51,9 @@ const Navbar: React.FC<Props> = (props) => {
                 ?
                 (<Profile user={props.user}/>)
                 :
-                (<SteamLoginWrapper><PointerCursorWrapper><Link href={"/auth/login"}>
+                (<SteamLoginWrapper><Link href={"/auth/login"}>
                     <img alt={"steamLogin"} src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_01.png" width="180" height="35"/>
-                </Link></PointerCursorWrapper></SteamLoginWrapper>)}
+                </Link></SteamLoginWrapper>)}
         </Container>
     )
 };

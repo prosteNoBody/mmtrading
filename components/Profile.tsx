@@ -21,7 +21,7 @@ const SectionProfile = styled.div`
   height: 100%;
   
   color: var(--color-black);
-  border-left: ${(props:Open) => props.open ? 1 : 1.5}rem solid var(--color-mythical);
+  border-left: ${(props:Open) => props ? 1 : 1.5}rem solid var(--color-mythical);
   
   text-align: center;
   font-size: 1.5rem;
@@ -53,13 +53,13 @@ const SectionProfileArrow = styled.div`
   
   ${SectionProfile}:hover &{
     margin: 1.5rem 0.75rem 1.5rem 0.75rem;
-    transform: rotate(${(props:Open) => (props.open ? '180deg' : '0deg')});
   }
 `;
 
 interface Open{
     open?:boolean;
 }
+
 type Props = {
     user?: User;
 }

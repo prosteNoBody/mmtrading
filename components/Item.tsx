@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components'
 
 const Container = styled.div`
@@ -117,6 +117,7 @@ const WrapHiddenOverflow = styled.div`
 
 type DetailsProps = {
     color: string;
+    open: boolean;
 };
 const Details = styled.div`
   position: absolute;
@@ -132,13 +133,10 @@ const Details = styled.div`
   text-align: center;
   
   z-index: 2;
+  transform-origin: top;
   transition: transform 200ms;
-  transform: translateY(20px) scale(0);
-  
-  ${WrapHiddenOverflow}:hover ~ &{
-    transform: translateY(20px) scale(1);
-    transition: transform 200ms 500ms;
-  }
+  transform: ${(props:DetailsProps) => props.open ? 'translateY(20px) scale(1)' : 'translateY(20px) scale(0)'};
+
   &::before{
     content: "";
     position: absolute;
@@ -217,6 +215,32 @@ type Props = {
 }
 const Item: React.FC<Props> = (props) => {
     const {assetid,name,rarity,imageUrl,color,descriptions,action,createDescription} = props;
+    const [detailOpen, setDetailOpen] = useState(false);
+    let node = null;
+
+    const handleClick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.nativeEvent.which === 1) {
+            action(assetid);
+        } else if (e.nativeEvent.which === 3) {
+            setDetailOpen(!detailOpen);
+        }
+    }
+
+    const callback = (e) => {
+        if(node && !node.contains(e.target)){
+            setDetailOpen(false);
+        }
+    };
+    useEffect(() => {
+        document.body.addEventListener('mousedown',callback);
+
+        return (() => {
+            document.body.removeEventListener('mousedown',callback);
+        })
+    });
+
 
     const createDescriptions = (descriptions) => {
         return descriptions.map((description:Description,index:number) => {
@@ -227,7 +251,7 @@ const Item: React.FC<Props> = (props) => {
         if(!createDescription)
             return;
         return (
-            <Details color={color}>
+            <Details color={color} open={detailOpen}>
                 <NameTitle>{name}</NameTitle>
                 <Divider/>
                 <Rarity rarityColor={color}>{rarity}</Rarity>
@@ -238,12 +262,12 @@ const Item: React.FC<Props> = (props) => {
     };
 
     return (
-        <Container>
-            <WrapHiddenOverflow rarityColor={color} onClick={() => action(assetid)}>
+        <Container ref={element => node = element} onMouseDown={handleClick} onContextMenu={(e) => {e.preventDefault()}}>
+            <WrapHiddenOverflow rarityColor={color}>
                 <Img width="120px" height="80px" alt={'item'} src={imageUrl}/>
                 {/*<ImgPlaceholder display={loadingImg}><LoadingI aria-hidden className="fas fa-hat-wizard"/></ImgPlaceholder>*/}
                 <RarityImg rarityColor={color}>{rarity}</RarityImg>
-                <MouseIcon img="/mouseIcon.svg"/>
+                {createDescription ? <MouseIcon img="/mouseIcon.svg"/> : ''}
             </WrapHiddenOverflow>
             {createDetails()}
         </Container>

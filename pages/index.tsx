@@ -48,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}
         return {
             props:{
                 user:{
-                    persona: req.user.name,
+                    name: req.user.name,
                     avatar: req.user.avatar,
                     credit: req.user.credit,
                 }

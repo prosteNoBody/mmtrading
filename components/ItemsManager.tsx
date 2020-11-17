@@ -10,8 +10,12 @@ type ContainerProps = {
 const Container = styled.div`
   grid-area: ${(props: ContainerProps) => props.gridSelector};
   
+  display: flex;
+  justify-content: center;
+  
+  flex: 1;
+  
   padding: 1rem;
-  max-height: 100%;
   
   background: rgb(28,28,28);
   background: radial-gradient(circle, rgba(45,45,45,1) 0%, rgba(28,28,28,1) 100%);
@@ -35,6 +39,9 @@ const Container = styled.div`
 `;
 
 const ItemsContainer = styled.div`
+  justify-self: auto;
+  align-self: auto;
+
   display: flex;
   justify-content: center;
   align-content: flex-start;
@@ -78,7 +85,7 @@ type Props = {
     gridSelector: string;
     createDescriptions: boolean;
 }
-const OfferEditor: React.FC<Props> = (props) => {
+const ItemsManager: React.FC<Props> = (props) => {
     const {items,action,gridSelector, createDescriptions} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
@@ -101,4 +108,4 @@ const OfferEditor: React.FC<Props> = (props) => {
     );
 };
 
-export default OfferEditor;
+export default ItemsManager;
