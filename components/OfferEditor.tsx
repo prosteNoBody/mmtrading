@@ -10,7 +10,7 @@ import ControlsManager from './ControlsManager';
 import OfferSubmitter from './OfferSubmitter';
 
 const Container = styled.div`
-  grid-area: offer-manager;
+  grid-area: main-content;
   display: grid;
   grid-template-columns: 1fr 8rem 1fr;
   grid-template-rows: 3fr 20rem;
@@ -122,7 +122,7 @@ const OfferEditor: React.FC<Props> = (props) => {
     return (
         <Container>
             <ItemsManagerPaged isLoading={loading} error={errorMessage} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true} itemsPerPage={100}/>
-            <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true}/>
+            <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true} itemSize={'100px'}/>
             <ControlsManager refreshAction={refreshItems} emptyAction={emptyOffer} fullAction={emptyInventory}/>
             <OfferSubmitter items={offerItems} persona={persona} avatar={avatar}/>
         </Container>

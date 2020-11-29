@@ -25,7 +25,8 @@ const Container = styled.div`
     filter: drop-shadow(0 0 .2rem var(--color-black));
     transform-origin: top;
     transform: translateX(${(props:Open) => (props.open ? '0' : '20rem')});
-    transition: transform 400ms ease-out;
+    opacity: ${(props:Open) => (props.open ? '1' : '0')};
+    transition: transform 400ms ease-out, opacity 300ms ease-out;
 `;
 
 const DropdownItem = styled.div`

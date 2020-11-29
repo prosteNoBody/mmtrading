@@ -65,7 +65,7 @@ class SteamBot {
     };
     GraphQLGetUserItems = async (steamid) => {
         return new Promise((resolve, reject) => {
-            this.manager.getUserInventoryContents(steamid,570,2,false, (error,inventory) => {
+            this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
                 if(error || typeof inventory == 'undefined'){
                     return reject(error);
                 }

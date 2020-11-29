@@ -1,12 +1,13 @@
+import Link from "next/link";
 import * as React from "react";
-import Head from 'next/head';
-import styled from 'styled-components'
-
-import { GetServerSideProps } from 'next'
+import Head from "next/head";
 import {IncomingMessage} from "http";
+import {GetServerSideProps} from "next";
+
 
 import MainContainer from "../components/MainContainer";
-import Navbar from '../components/Navbar';
+import Navbar from "../components/Navbar";
+import SettingsEditor from "../components/SettingsEditor";
 import OfferEditor from "../components/OfferEditor";
 
 type Props = {
@@ -19,10 +20,10 @@ const dashboard = (props:Props) => {
     return (
         <MainContainer>
             <Head>
-                <title>MMTrading | Dashboard</title>
+                <title>MMTrading | Settings</title>
             </Head>
             <Navbar user={user}/>
-            <OfferEditor avatar={avatar} persona={persona}/>
+            <SettingsEditor/>
         </MainContainer>
     );
 };

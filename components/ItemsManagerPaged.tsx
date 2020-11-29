@@ -91,7 +91,6 @@ const ItemsManagerPaged: React.FC<Props> = (props) => {
             if(i === pageNumber) res.push(<PageBtnActive key={i} onClick={() => setPageNumber(i)}>{i}</PageBtnActive>)
             else res.push(<PageBtn key={i} onClick={() => setPageNumber(i)}>{i}</PageBtn>)
         }
-        console.log(activeItems);
         return res;
     }
 

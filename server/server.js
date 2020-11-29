@@ -19,7 +19,7 @@ const mainPage = "/dashboard";
 
 const bot = new SteamBot(config);
 const db = new Database(config);
-const graphqlApi = new GraphqlApi(bot);
+const graphqlApi = new GraphqlApi(bot,db);
 const auth = new Auth(indexPage, mainPage);
 
 auth.setup();

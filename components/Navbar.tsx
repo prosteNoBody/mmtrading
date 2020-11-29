@@ -14,7 +14,6 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   
-  box-shadow: var(--color-black) ;
   background: var(--color-white);
   
   filter: drop-shadow(0 0 0.75rem var(--color-black));
@@ -46,7 +45,7 @@ const Navbar: React.FC<Props> = (props) => {
             <Section href={"/"} color={"--color-ancient"}>MMtrading</Section>
             <Section href={"/dashboard"} color={"--color-arcana"}>Dashboard</Section>
             <Section href={"/offers"} color={"--color-immortal"}>Offers</Section>
-            <Section href={"/faq"} color={"--color-rare"}>F.A.Q.</Section>
+            <Section href={"/settings"} color={"--color-rare"}>Settings</Section>
             {props.user
                 ?
                 (<Profile user={props.user}/>)

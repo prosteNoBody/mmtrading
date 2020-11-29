@@ -139,7 +139,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
         <Container>
             <SemiContainer>
                 {generateProfileInfo(avatar,persona)}
-                <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false}/>
+                <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
                 <PriceEditor price={price ? price : ""} editPrice={editPrice}/>
                 <SubmitButton>SUBMIT</SubmitButton>
             </SemiContainer>

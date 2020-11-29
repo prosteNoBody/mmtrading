@@ -7,8 +7,9 @@ const {
 } = require('graphql');
 
 class GraphqlApi {
-    constructor(steamBot){
+    constructor(steamBot, db){
         this.steamBot = steamBot;
+        this.database = db;
 
         this.DescriptionType = new GraphQLObjectType({
             name: 'Description',

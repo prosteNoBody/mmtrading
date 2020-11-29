@@ -8,6 +8,7 @@ const Container = styled.div`
 `;
 type ContainerProps = {
     rarityColor:string;
+    size?: string;
 }
 type MouseIconProps = {
     img: string;
@@ -61,7 +62,6 @@ const ImgPlaceholder = styled.div`
   align-items: center;
 
   width: 120px;
-  height: 80px;
   
   background:grey;
   color: whitesmoke;
@@ -99,8 +99,7 @@ const WrapHiddenOverflow = styled.div`
   
   margin: 0.3rem;
   border-radius: 0.5rem;  
-  width: 120px;
-  height: 80px;
+  width: ${(props:ContainerProps) => props.size || '120px'};
   
   border: 2px solid #${(props:ContainerProps) => props.rarityColor};
   
@@ -212,18 +211,17 @@ type Props = {
     descriptions: Description[];
     action:(id:number) => void;
     createDescription: boolean;
+    itemSize?: string;
 }
 const Item: React.FC<Props> = (props) => {
-    const {assetid,name,rarity,imageUrl,color,descriptions,action,createDescription} = props;
+    const {assetid,name,rarity,imageUrl,color,descriptions,action,createDescription, itemSize} = props;
     const [detailOpen, setDetailOpen] = useState(false);
     let node = null;
 
     const handleClick = e => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.nativeEvent.which === 1) {
-            action(assetid);
-        } else if (e.nativeEvent.which === 3) {
+        if (e.nativeEvent.which === 3) {
+            e.preventDefault();
+            e.stopPropagation();
             setDetailOpen(!detailOpen);
         }
     }
@@ -256,15 +254,15 @@ const Item: React.FC<Props> = (props) => {
                 <Divider/>
                 <Rarity rarityColor={color}>{rarity}</Rarity>
                 <Divider/>
-                <div>{createDescriptions(descriptions)}</div>
+                <>{createDescriptions(descriptions)}</>
             </Details>
         )
     };
 
     return (
         <Container ref={element => node = element} onMouseDown={handleClick} onContextMenu={(e) => {e.preventDefault()}}>
-            <WrapHiddenOverflow rarityColor={color}>
-                <Img width="120px" height="80px" alt={'item'} src={imageUrl}/>
+            <WrapHiddenOverflow onClick={() => action(assetid)} rarityColor={color} size={itemSize}>
+                <Img width={itemSize || "120px"} alt={'item'} src={imageUrl}/>
                 {/*<ImgPlaceholder display={loadingImg}><LoadingI aria-hidden className="fas fa-hat-wizard"/></ImgPlaceholder>*/}
                 <RarityImg rarityColor={color}>{rarity}</RarityImg>
                 {createDescription ? <MouseIcon img="/mouseIcon.svg"/> : ''}

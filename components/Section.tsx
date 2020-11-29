@@ -28,6 +28,7 @@ const SectionContent = styled.div`
   
   transition: 300ms;
   cursor: pointer;
+  user-select: none;
   
   &:hover{
     border-right-width: 20px;
@@ -46,15 +47,15 @@ const Section: React.FC<Props> = (props) => {
 
     if(href){
         return (
-            <div>
+            <>
                 <Link href={href}><SectionContent color={color} bold={(router.pathname == href)}>{children}</SectionContent></Link>
-            </div>
+            </>
         )
     }
     return (
-        <div>
+        <>
             <SectionContent color={color} bold={(router.pathname == href)}>{children}</SectionContent>
-        </div>
+        </>
     )
 };
 

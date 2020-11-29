@@ -15,7 +15,7 @@ const Container = styled.div`
   
   flex: 1;
   
-  padding: 1rem;
+  padding: 2rem;
   
   background: rgb(28,28,28);
   background: radial-gradient(circle, rgba(45,45,45,1) 0%, rgba(28,28,28,1) 100%);
@@ -53,14 +53,18 @@ const InsideText = styled.div`
   flex-flow: column;
   justify-content: center;
   align-items: center;
-  
-  height: 100%;
-  
+
   color: grey;
   
   text-align: center;
   font-size: 200%;
   user-select: none;
+`;
+
+const BottomPadding = styled.div`
+  width: 100%;
+  
+  padding-bottom: 2rem;
 `;
 
 type Description = {
@@ -84,21 +88,22 @@ type Props = {
     action:(id:number) => void;
     gridSelector: string;
     createDescriptions: boolean;
+    itemSize?: string;
 }
 const ItemsManager: React.FC<Props> = (props) => {
-    const {items,action,gridSelector, createDescriptions} = props;
+    const {items,action,gridSelector, createDescriptions, itemSize} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
     const createItem = (item:Item,action) => {
-        return <Item createDescription={createDescriptions} key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action}/>
+        return <Item createDescription={createDescriptions} key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action} itemSize={itemSize}/>
     };
 
     const generateItems = () => {
         if(isLoading) return <InsideText>Loading... <LoadingIcon/></InsideText>;
-        if(error) return <InsideText>{error}</InsideText>;
-        if(!items[0]) return <InsideText>No items...</InsideText>;
-        return <ItemsContainer>{items.map(item => createItem(item,action))}</ItemsContainer>
+        else if(error) return <InsideText>{error}</InsideText>;
+        else if(!items[0]) return <InsideText>No items...</InsideText>;
+        return <ItemsContainer>{items.map((item) => createItem(item,action))}<BottomPadding/></ItemsContainer>
     };
 
     return (
