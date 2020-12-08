@@ -67,6 +67,7 @@ class SteamBot {
         return new Promise((resolve, reject) => {
             this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
                 if(error || typeof inventory == 'undefined'){
+                    console.log(error);
                     return reject(error);
                 }
                 inventory = inventory.map(item => {
