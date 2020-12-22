@@ -86,6 +86,7 @@ const ItemsManagerPaged: React.FC<Props> = (props) => {
     }
 
     const generateBtns = () => {
+        if(maxPage === 1) return false;
         let res = [];
         for(let i = 1; i <= maxPage;i++){
             if(i === pageNumber) res.push(<PageBtnActive key={i} onClick={() => setPageNumber(i)}>{i}</PageBtnActive>)

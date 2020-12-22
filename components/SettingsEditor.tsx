@@ -4,10 +4,6 @@ import styled from 'styled-components';
 import {useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
-import ItemsManagerPaged from "./ItemsManagerPaged";
-import ItemsManager from './ItemsManager';
-import ControlsManager from './ControlsManager';
-import OfferSubmitter from './OfferSubmitter';
 import TradeLinkEditor from "./TradeLinkEditor";
 
 const Container = styled.div`

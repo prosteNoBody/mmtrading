@@ -99,6 +99,7 @@ const OfferEditor: React.FC<Props> = (props) => {
     };
     const refreshItems = () => {
         setOfferItems([]);
+        setInventoryItems([]);
         refetch().then();
     };
     const emptyInventory = () => {

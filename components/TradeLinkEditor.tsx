@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import { useToasts } from 'react-toast-notifications';
-import Link from "next/link";
 import styled from 'styled-components';
 
 import LazyLoadingButton from "./LazyLoadingButton";
@@ -77,12 +76,22 @@ const TradeLinkEditor: React.FC<Props> = (props) => {
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
+            addToast("Cannot fetch your url", {
+                appearance: 'warning',
+                autoDismiss: true,
+            })
         },3000)
+    }
+
+    const handleKeyDown = e => {
+        if(e.keyCode === 13) {
+            updateUrl();
+        }
     }
 
     return(
         <Container isLoading={isLoading}>
-            <InputUrl placeholder="Trade Link" onFocus={e => e.target.select()} disabled={isLoading}/>
+            <InputUrl placeholder="Trade Link" onFocus={e => e.target.select()} onKeyDown={handleKeyDown} disabled={isLoading}/>
             <LazyLoadingButton isLoading={isLoading} displayedText={"Update"} action={updateUrl}/>
             <TradeLinkUrl href={tradeLinkUrl} target="_blank">Where get trade link?</TradeLinkUrl>
         </Container>

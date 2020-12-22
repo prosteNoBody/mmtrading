@@ -4,6 +4,7 @@ import '../styles/global.css';
 import fetch from 'isomorphic-unfetch';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
+import { ToastProvider } from 'react-toast-notifications';
 
 const client = new ApolloClient({
     uri: 'http://localhost:3000/api',
@@ -13,7 +14,9 @@ const client = new ApolloClient({
 export default function App({ Component, pageProps }) {
     return (
         <ApolloProvider client={client}>
-            <Component {...pageProps} />
+            <ToastProvider>
+                <Component {...pageProps} />
+            </ToastProvider>
         </ApolloProvider>
     );
 }
