@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const MongoDBStore = require('connect-mongodb-session')(session);
 const expressGraphQL = require('express-graphql');
 const next = require("next");
 
@@ -21,6 +22,10 @@ const bot = new SteamBot(config);
 const db = new Database(config);
 const graphqlApi = new GraphqlApi(bot,db);
 const auth = new Auth(indexPage, mainPage);
+const store = new MongoDBStore({
+    uri: config.mongoUrl,
+    collection: 'authSession'
+})
 
 auth.setup();
 app.prepare().then(() => {
@@ -33,7 +38,8 @@ app.prepare().then(() => {
         saveUninitialized: true,
         cookie: {
             maxAge: 900000
-        }
+        },
+        store: store
     }));
     auth.initialize(server);
 

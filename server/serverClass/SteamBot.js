@@ -2,6 +2,7 @@ const SteamUser = require("steam-user");
 const SteamTotp = require('steam-totp');
 const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
+const SteamId = require('steamid')
 
 class Config {
     constructor(config) {
@@ -41,7 +42,7 @@ class SteamBot {
             this.manager.setCookies(session);
             this.community.setCookies(session);
 
-            //this.community.startConfirmationChecker(30000,this.config.bot_identity_secret);
+            this.community.startConfirmationChecker(30000,this.config.bot_identity_secret);
         });
     }
     getUserItems = (steamid,cb) => {
@@ -65,17 +66,17 @@ class SteamBot {
     };
     GraphQLGetUserItems = async (steamid) => {
         return new Promise((resolve, reject) => {
-            this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
+            this.manager.getUserInventoryContents(steamid,570,2,false, (error,inventory) => {
                 if(error || typeof inventory == 'undefined'){
-                    console.log(error);
                     return reject(error);
                 }
                 inventory = inventory.map(item => {
-                    if(!item.descriptions.length)
-                        item.descriptions = [{type:"html",value:"No Descriptions"}];
+                    if(!item.descriptions.length) {
+                        item.descriptions = [{type: "html", value: "No Descriptions"}];
+                    }
                     return{
                         index: item.pos,
-                        assetid:item.assetid,
+                        assetid: item.assetid,
                         name: item.market_name,
                         icon_url: item.getImageURL() + "200x200",
                         rarity: item.tags[1].name,
@@ -87,6 +88,24 @@ class SteamBot {
             })
         });
     };
+    isTokenValid = async (steamid, token) => {
+        return new Promise((resolve, reject) => {
+            const testingOffer = this.manager.createOffer(steamid, token);
+            testingOffer.getUserDetails(err => {
+                resolve(!err);
+            })
+        })
+    }
+
+    /**
+     * Converts 64 bit SteamID string to account ID.
+     * @param  {string} steamid 64 bit SteamID.
+     * @return {string}         Account ID.
+     */
+    getPartnerId = steamid => {
+        const steamObject = new SteamId(steamid);
+        return /[0-9]{9}/.exec(steamObject.getSteam3RenderedID())[0];
+    }
 }
 
 module.exports = SteamBot;

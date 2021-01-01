@@ -1,8 +1,12 @@
 import React, {useState} from 'react';
 import styled from 'styled-components'
+import { useToasts } from 'react-toast-notifications';
 
 import ItemManager from './ItemsManager';
 import PriceEditor from './PriceEditor';
+import LazyLoadingButton from "./LazyLoadingButton";
+import {useLazyQuery} from "@apollo/react-hooks";
+import {gql} from "apollo-boost";
 
 const Container = styled.div`
   grid-area: preview;
@@ -72,7 +76,7 @@ const ProfileImgWrapper = styled.div`
   filter: drop-shadow(0 0 .4rem var(--color-rare));
   overflow: hidden;
 `;
-const SubmitButton = styled.div`
+const SubmitButton = styled.button`
   grid-area: submit;
   display: flex;
   justify-content: center;
@@ -114,8 +118,25 @@ type Props = {
     items: Item[];
     link?: string;
 }
+
+type CreateOfferResponse = {
+    createOffer?: {
+        error?: number;
+        success?: boolean;
+    }
+}
+const CREATE_OFFER__REQUEST = gql`
+    query createOffer($items: [String]!){
+        createOffer(items: $items){
+            error
+            success
+        }
+    }
+`;
+
 const OfferSubmitter: React.FC<Props> = (props) => {
-    const {items,avatar,persona} = props;
+    const { addToast } = useToasts();
+    const {items, avatar, persona} = props;
     const [price,setPrice] = useState(0);
 
     const editPrice = (event) => {
@@ -135,13 +156,55 @@ const OfferSubmitter: React.FC<Props> = (props) => {
           )
     };
 
+    const [createOfferQuery, {loading}] = useLazyQuery<CreateOfferResponse>(CREATE_OFFER__REQUEST, {
+        fetchPolicy: 'network-only',
+        onError: () => {
+            addToast("Error while sending items", {
+                autoDismiss: true,
+                appearance: 'error',
+            })
+        },
+        onCompleted: data => {
+            if(data.createOffer?.success) {
+                addToast("Good work motherfucker", {
+                    autoDismiss: true,
+                    appearance: 'success'
+                })
+            } else {
+                let errorMsg = "There was problem in sending request to server";
+                if(data.createOffer?.error){
+                    switch (data.createOffer.error){
+                        case 1:
+                            errorMsg = "Looks like broken"
+                            break;
+                    }
+                }
+                addToast(errorMsg, {
+                    autoDismiss: true,
+                    appearance: 'warning',
+                })
+            }
+        }
+    })
+
+    const sendItems = () => {
+        if(items === []) {
+
+        }
+        const itemsToSend = items.map(item => {
+            return item.assetid;
+        })
+        console.log(itemsToSend);
+        createOfferQuery({variables: {items: itemsToSend}})
+    }
+
     return (
         <Container>
             <SemiContainer>
                 {generateProfileInfo(avatar,persona)}
                 <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
                 <PriceEditor price={price ? price : ""} editPrice={editPrice}/>
-                <SubmitButton>SUBMIT</SubmitButton>
+                <LazyLoadingButton small={true} isLoading={loading} displayedText="ODESLAT" action={() => {sendItems()}}/>
             </SemiContainer>
         </Container>
     )

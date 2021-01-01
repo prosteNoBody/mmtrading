@@ -100,6 +100,7 @@ const WrapHiddenOverflow = styled.div`
   margin: 0.3rem;
   border-radius: 0.5rem;  
   width: ${(props:ContainerProps) => props.size || '120px'};
+  height: ${(props:ContainerProps) => props.size ? (Number(props.size.substr(0,3))/3*2) + "px" : '79px'};
   
   border: 2px solid #${(props:ContainerProps) => props.rarityColor};
   

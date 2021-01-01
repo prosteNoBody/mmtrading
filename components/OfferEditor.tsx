@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
+import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
 
-import {useQuery} from "@apollo/react-hooks";
+import {useLazyQuery, useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
 import ItemsManagerPaged from "./ItemsManagerPaged";
@@ -50,25 +51,43 @@ type Props = {
     persona: string;
     avatar: string;
 }
+type TradeLink = {
+    getTradeUrl?: {
+        error?: string,
+        tradeurl?: string,
+        changed?: boolean,
+    }
+}
+
+const TRADE_LINK_REQUEST = gql`
+    {
+        getTradeUrl{
+            error
+            tradeurl
+        }
+    }
+`
 const ITEM_REQUEST = gql`
-        {
-            inventory{
-                error
-                items{
-                    index
-                    assetid
-                    name
-                    icon_url
-                    rarity
-                    color
-                    descriptions{
-                        type
-                        value
-                    }
+    {
+        inventory{
+            error
+            items{
+                index
+                assetid
+                name
+                icon_url
+                rarity
+                color
+                descriptions{
+                    type
+                    value
                 }
             }
-        }`;
+        }
+    }
+`;
 const OfferEditor: React.FC<Props> = (props) => {
+    const { addToast } = useToasts();
     const {persona,avatar} = props;
     const [errorMessage,setErrorMessage] = useState("");
 
@@ -77,18 +96,41 @@ const OfferEditor: React.FC<Props> = (props) => {
     const [offerItems,setOfferItems] = useState<Item[]>([]);
 
     const {loading, error, data, refetch} = useQuery<RespondData>(ITEM_REQUEST,{fetchPolicy: 'cache-and-network'});
+    useQuery<TradeLink>(TRADE_LINK_REQUEST,{
+        fetchPolicy: 'network-only',
+        onCompleted: data => {
+            if(data.getTradeUrl?.error) {
+                addToast("You are required to be logged in! Please re/login first", {
+                    autoDismiss: true,
+                    appearance: 'warning',
+                })
+            } else if(typeof data.getTradeUrl?.tradeurl === 'string' && data.getTradeUrl.tradeurl === "") {
+                addToast("You need to set trade url in settings before trading items", {
+                    autoDismiss: true,
+                    appearance: 'error',
+                })
+            }
+        },
+        onError: () => {
+            addToast("Error occur when fetching data from server", {
+                autoDismiss: true,
+                appearance: 'error',
+            })
+        }
+    });
+
 
     useEffect(() => {
         if(error)
             setErrorMessage("We were unable to get inventory data from server.");
-        if(data){
+        else if(data){
             // if(data.error)
             //     setErrorMessage(data.error);
             if(data.inventory.error)
                 setErrorMessage(data.inventory.error);
             if(data.inventory.items){
                 setInventory(data.inventory.items);
-                setInventoryItems(data.inventory.items);
+                setInventoryItems(sortItems(data.inventory.items));
                 setOfferItems([]);
             }
         }

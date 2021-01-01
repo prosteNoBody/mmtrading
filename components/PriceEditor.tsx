@@ -9,10 +9,14 @@ const Container = styled.div`
 `;
 const Wrapper = styled.div`
   position: relative;
+  width: 80%;
 `;
 const PriceInput = styled.input`
   font-size: 3.5rem;
   text-align: center;
+  
+  margin: auto;
+  width: 100%;
   
   color: var(--color-white);
   background: none;

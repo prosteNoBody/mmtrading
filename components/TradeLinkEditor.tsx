@@ -1,8 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
 
 import LazyLoadingButton from "./LazyLoadingButton";
+import {useLazyQuery, useQuery} from "@apollo/react-hooks";
+import {gql} from 'apollo-boost';
 
 const Container = styled.div`
   width: 80%;
@@ -63,36 +65,98 @@ const TradeLinkUrl = styled.a`
 type Props = {
     action: () => void;
 }
+type TradeLink = {
+    getTradeUrl?: {
+        error?: string,
+        tradeurl?: string,
+        changed?: boolean,
+    }
+}
+
+const TRADELINK_REQUEST = gql`
+        query ($tradeUrl: String!){
+            getTradeUrl(tradeUrl:$tradeUrl){
+                error
+                tradeurl
+                changed
+            }
+        }`;
 const TradeLinkEditor: React.FC<Props> = (props) => {
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [tradeUrl, setTradeUrl] = useState("");
     const { addToast } = useToasts();
+    const inputEl = useRef(null);
+
+    const [getQuery, {loading, error }] = useLazyQuery<TradeLink>(TRADELINK_REQUEST,{
+        fetchPolicy: 'network-only',
+        onCompleted: (data => {
+            if(data) {
+                if(data.getTradeUrl?.error) {
+                    let errorMsg = "There was an error during data request"
+                    switch (data.getTradeUrl.error) {
+                        case "1":
+                            errorMsg = "You are required to be logged in! Please re/login first"
+                            break;
+                        case "2":
+                            errorMsg = "This is already your url"
+                            break;
+                        case "3":
+                            errorMsg = "Url is invalid"
+                            break;
+                        case "4":
+                            errorMsg = "Token you provide is not valid"
+                            break;
+                    }
+                    addToast(errorMsg , {
+                        appearance: 'warning',
+                        autoDismiss: true,
+                    })
+                } else if(data.getTradeUrl?.tradeurl) {
+                    if(data.getTradeUrl.changed){
+                        addToast("Your trade link was successfully updated", {
+                            appearance: 'success',
+                            autoDismiss: true,
+                        })
+                    }
+                    setTradeUrl(data.getTradeUrl?.tradeurl);
+                }
+            } else if(error) {
+                addToast("There was an error during data request" , {
+                    appearance: 'error',
+                    autoDismiss: true,
+                })
+            }
+            inputEl.current.focus();
+        })
+    });
+
     useEffect(() => {
-        updateUrl();
-    }, [])
+        refetchData(true)
+    },[])
 
     const tradeLinkUrl = "https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url";
 
-    const updateUrl = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            addToast("Cannot fetch your url", {
+    const handleKeyDown = e => {
+        if(e.keyCode === 13) {
+            refetchData();
+        }
+    }
+
+    const refetchData = (inital:boolean = false) => {
+        if(!inital && tradeUrl === "") {
+            inputEl.current.focus();
+            addToast("You have to fill your token before sending", {
                 appearance: 'warning',
                 autoDismiss: true,
             })
-        },3000)
-    }
-
-    const handleKeyDown = e => {
-        if(e.keyCode === 13) {
-            updateUrl();
+        } else {
+            getQuery({variables: {tradeUrl}})
         }
     }
 
     return(
-        <Container isLoading={isLoading}>
-            <InputUrl placeholder="Trade Link" onFocus={e => e.target.select()} onKeyDown={handleKeyDown} disabled={isLoading}/>
-            <LazyLoadingButton isLoading={isLoading} displayedText={"Update"} action={updateUrl}/>
+        <Container isLoading={loading}>
+            <InputUrl ref={inputEl} placeholder="Trade Link" value={tradeUrl} onChange={e => setTradeUrl(e.target.value)} onFocus={e => e.target.select()} onKeyDown={handleKeyDown} disabled={loading}/>
+            <LazyLoadingButton isLoading={loading} displayedText={"Update"} action={() => refetchData()}/>
             <TradeLinkUrl href={tradeLinkUrl} target="_blank">Where get trade link?</TradeLinkUrl>
         </Container>
     );
