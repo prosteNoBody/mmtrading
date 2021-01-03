@@ -119,17 +119,23 @@ type Props = {
     link?: string;
 }
 
+type CreateOfferVars = {
+    items: Array<string>;
+    price: string;
+}
 type CreateOfferResponse = {
     createOffer?: {
         error?: number;
         success?: boolean;
+        link?: string;
     }
 }
 const CREATE_OFFER__REQUEST = gql`
-    query createOffer($items: [String]!){
-        createOffer(items: $items){
+    query createOffer($items: [String]!, $price: String!){
+        createOffer(items: $items, price: $price){
             error
             success
+            link
         }
     }
 `;
@@ -137,12 +143,10 @@ const CREATE_OFFER__REQUEST = gql`
 const OfferSubmitter: React.FC<Props> = (props) => {
     const { addToast } = useToasts();
     const {items, avatar, persona} = props;
-    const [price,setPrice] = useState(0);
+    const [price,setPrice] = useState("");
 
     const editPrice = (event) => {
-        if(event.target.value !== "" && !Number(event.target.value))
-            return;
-        setPrice(Number(event.target.value));
+        setPrice(event.target.value.replace(",",".").replace(/[^0-9.]/g, ""));
     };
 
     const generateProfileInfo = (avatar, persona) => {
@@ -156,7 +160,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
           )
     };
 
-    const [createOfferQuery, {loading}] = useLazyQuery<CreateOfferResponse>(CREATE_OFFER__REQUEST, {
+    const [createOfferQuery, {loading}] = useLazyQuery<CreateOfferResponse, CreateOfferVars>(CREATE_OFFER__REQUEST, {
         fetchPolicy: 'network-only',
         onError: () => {
             addToast("Error while sending items", {
@@ -166,17 +170,33 @@ const OfferSubmitter: React.FC<Props> = (props) => {
         },
         onCompleted: data => {
             if(data.createOffer?.success) {
-                addToast("Good work motherfucker", {
+                if(data.createOffer?.link)
+                    console.log(data.createOffer.link);
+                addToast("Offer was successfully created, bot will send you trade offer soon", {
                     autoDismiss: true,
                     appearance: 'success'
                 })
             } else {
-                let errorMsg = "There was problem in sending request to server";
+                let errorMsg = "There was an error while creating offer";
                 if(data.createOffer?.error){
                     switch (data.createOffer.error){
                         case 1:
-                            errorMsg = "Looks like broken"
+                            errorMsg = "You didn't choose any items"
                             break;
+                        case 2:
+                            errorMsg = "You need to set valid trade url"
+                            break;
+                        case 3:
+                            errorMsg = "There was problem with your items/inventory"
+                            break;
+                        case 4:
+                            errorMsg = "You required to be log-in before sending offer";
+                            break;
+                        case 5:
+                            errorMsg = "You have to enter valid price";
+                            break;
+                        case 6:
+                            errorMsg = "There was problem in sending you an offer, check if you don't have VAC/Trade ban"
                     }
                 }
                 addToast(errorMsg, {
@@ -188,14 +208,21 @@ const OfferSubmitter: React.FC<Props> = (props) => {
     })
 
     const sendItems = () => {
-        if(items === []) {
-
+        if(price !== "" && !Number(price)) {
+            return;
+        } else if(items.length === 0) {
+            setTimeout(() => {
+                return addToast("You have to choose item before sending offer", {
+                    autoDismiss: true,
+                    appearance: 'warning',
+                })
+            }, 500)
+        } else {
+            const itemsToSend = items.map(item => {
+                return item.assetid.toString();
+            })
+            createOfferQuery({variables: {items: itemsToSend, price}})
         }
-        const itemsToSend = items.map(item => {
-            return item.assetid;
-        })
-        console.log(itemsToSend);
-        createOfferQuery({variables: {items: itemsToSend}})
     }
 
     return (

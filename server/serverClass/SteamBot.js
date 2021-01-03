@@ -4,6 +4,9 @@ const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 const SteamId = require('steamid')
 
+const DOTA_APP_ID = 570;
+const CONTEXT_ID = 2;
+
 class Config {
     constructor(config) {
         this.bot_id = config.bot_id;
@@ -45,6 +48,7 @@ class SteamBot {
             this.community.startConfirmationChecker(30000,this.config.bot_identity_secret);
         });
     }
+    //OUTDATED
     getUserItems = (steamid,cb) => {
         this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
             if(error)
@@ -66,9 +70,9 @@ class SteamBot {
     };
     GraphQLGetUserItems = async (steamid) => {
         return new Promise((resolve, reject) => {
-            this.manager.getUserInventoryContents(steamid,570,2,false, (error,inventory) => {
+            this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
                 if(error || typeof inventory == 'undefined'){
-                    return reject(error);
+                    return reject("File could not be loaded, your profile may be private!");
                 }
                 inventory = inventory.map(item => {
                     if(!item.descriptions.length) {
@@ -94,6 +98,59 @@ class SteamBot {
             testingOffer.getUserDetails(err => {
                 resolve(!err);
             })
+        })
+    }
+    validateOfferItems = async (steamid, items) => {
+        let inventoryItems;
+        try {
+            inventoryItems = await this.GraphQLGetUserItems(steamid);
+        } catch {
+            return false;
+        }
+        inventoryItems = inventoryItems.map(inventoryItem => {
+            return inventoryItem.assetid;
+        })
+        for(let i = 0; i < items.length; i++) {
+            if(!inventoryItems.includes(items[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Return result after trying to create new offer
+     * @callback ReturnOfferResult
+     * @param {string} error
+     * @param {string} offerId
+     */
+
+    /**
+     * create inital item offer
+     * @param  {string} tradeurl
+     * @param  {Array.string} items
+     * @param {ReturnOfferResult} cb
+     */
+    createNewOffer = async (tradeurl, items) => {
+        return new Promise((resolve, reject) => {
+            let offer = this.manager.createOffer(tradeurl);
+            items = items.map(item => {
+                return {
+                    assetid: item,
+                    appid: DOTA_APP_ID,
+                    contextid: CONTEXT_ID,
+                }
+            })
+            offer.addTheirItems(items);
+            offer.setMessage("Offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it");
+            offer.send(err => {
+                if(err) {
+                    return reject(err);
+                } else {
+                    return resolve(offer.id);
+                }
+            });
         })
     }
 

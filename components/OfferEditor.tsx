@@ -95,7 +95,23 @@ const OfferEditor: React.FC<Props> = (props) => {
     const [inventoryItems,setInventoryItems] = useState<Item[]>([]);
     const [offerItems,setOfferItems] = useState<Item[]>([]);
 
-    const {loading, error, data, refetch} = useQuery<RespondData>(ITEM_REQUEST,{fetchPolicy: 'cache-and-network'});
+    const [getItemsQuery, {loading}] = useLazyQuery<RespondData>(ITEM_REQUEST, {
+        fetchPolicy: "network-only",
+        onCompleted: data => {
+            if(data.inventory.error)
+                setErrorMessage(data.inventory.error);
+            if(data.inventory.items){
+                setErrorMessage(null);
+                setInventory(data.inventory.items);
+                setInventoryItems(sortItems(data.inventory.items));
+                setOfferItems([]);
+            }
+        },
+        onError: () => {
+            setErrorMessage("We were unable to get inventory data from server.");
+        }
+    })
+
     useQuery<TradeLink>(TRADE_LINK_REQUEST,{
         fetchPolicy: 'network-only',
         onCompleted: data => {
@@ -121,20 +137,8 @@ const OfferEditor: React.FC<Props> = (props) => {
 
 
     useEffect(() => {
-        if(error)
-            setErrorMessage("We were unable to get inventory data from server.");
-        else if(data){
-            // if(data.error)
-            //     setErrorMessage(data.error);
-            if(data.inventory.error)
-                setErrorMessage(data.inventory.error);
-            if(data.inventory.items){
-                setInventory(data.inventory.items);
-                setInventoryItems(sortItems(data.inventory.items));
-                setOfferItems([]);
-            }
-        }
-    },[error,data]);
+        getItemsQuery();
+    },[]);
 
     const sortItems = (array:Item[]) => {
         return array.sort((itemA,itemB)=>(itemA.index < itemB.index) ? 1 : -1);
@@ -142,7 +146,7 @@ const OfferEditor: React.FC<Props> = (props) => {
     const refreshItems = () => {
         setOfferItems([]);
         setInventoryItems([]);
-        refetch().then();
+        getItemsQuery()
     };
     const emptyInventory = () => {
         setInventoryItems([]);

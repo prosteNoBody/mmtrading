@@ -4,8 +4,9 @@ const Schema = mongoose.Schema;
 const OfferScheme = new Schema({
     offer_id:String,
     user_id: String,
-    items: [Number],
+    items: [String],
     price: Number,
+    time: String,
     link: String,
     status: Number,
 });

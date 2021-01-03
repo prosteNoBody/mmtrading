@@ -36,6 +36,7 @@ app.prepare().then(() => {
         secret: "secret_key",
         resave: true,
         saveUninitialized: true,
+        rolling: true,
         cookie: {
             maxAge: 900000
         },

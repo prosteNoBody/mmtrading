@@ -1,5 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const uuid = require('uuid');
+
 const User = require('../models/User');
+const Offer = require('../models/Offer');
 
 const STEAM_TRADE_LINK = "https://steamcommunity.com/tradeoffer/new/";
 const STEAM_LINK_PARAM_PARTNER = "partner=";
@@ -38,6 +41,22 @@ class Database{
         return await User.findOneAndUpdate({steamid: steamid}, {tradeUrl: steam_link},{new: true}).then(user => {
             return cb(user.tradeUrl);
         }).catch(() => {return {error: 99}});
+    }
+
+    async createNewOffer(steamid, offerid, items, price) {
+        return new Promise((resolve, reject) => {
+            new Offer({
+                offer_id: offerid,
+                user_id: steamid,
+                items: items,
+                price: price,
+                time: (new Date()).toISOString(),
+                link: uuid.v4(),
+                status: 0,
+            }).save().then( offer => {
+                return resolve(offer.link);
+            })
+        })
     }
 }
 

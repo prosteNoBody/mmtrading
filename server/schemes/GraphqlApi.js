@@ -74,7 +74,8 @@ class GraphqlApi {
             description: 'Return offer response',
             fields: () => ({
                 error: {type: GraphQLInt},
-                success: {type: GraphQLBoolean}
+                success: {type: GraphQLBoolean},
+                link: {type: GraphQLString}
             })
         })
 
@@ -145,10 +146,34 @@ class GraphqlApi {
                     description: 'Update and fetch trade url',
                     args: {
                         items: {type: GraphQLList(GraphQLString)},
+                        price: {type: GraphQLString},
                     },
-                    resolve: async (parent, { items }, req) => {
-                        console.log(items);
-                        return Math.random() > 0.5 ? {success: true} : {error: 1};
+                    resolve: async (parent, { items, price }, req) => {
+                        if (!req.user) {
+                            return {error: 4};
+                        } else if (!price || !Number(price)) {
+                            return {error: 5};
+                        } else if (items.length === 0) {
+                            return {error: 1};
+                        } else {
+                            price = Number(price);
+                            if(!await steamBot.validateOfferItems(req.user.steamid, items)) {
+                                return {error:3}
+                            } else {
+                                return await db.getUserTradeLink(req.user.steamid, async tradeLink => {
+                                    if(!(tradeLink && await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(tradeLink)))) {
+                                        return {error: 2};
+                                    } else {
+                                        return steamBot.createNewOffer(tradeLink, items).then(async offerid => {
+                                            let link = await db.createNewOffer(req.user.steamid, offerid, items, price);
+                                            return { success: true, link: link };
+                                        }).catch(() => {
+                                            return {error:6}
+                                        });
+                                    }
+                                });
+                            }
+                        }
                     }
                 }
             })
