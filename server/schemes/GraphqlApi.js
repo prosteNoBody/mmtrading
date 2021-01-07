@@ -151,12 +151,12 @@ class GraphqlApi {
                     resolve: async (parent, { items, price }, req) => {
                         if (!req.user) {
                             return {error: 4};
-                        } else if (!price || !Number(price)) {
+                        } else if (!price || !Number(price) || Number(price) < 0) {
                             return {error: 5};
                         } else if (items.length === 0) {
                             return {error: 1};
                         } else {
-                            price = Number(price);
+                            price = Math.round(Number(price) * 100)/100;
                             if(!await steamBot.validateOfferItems(req.user.steamid, items)) {
                                 return {error:3}
                             } else {

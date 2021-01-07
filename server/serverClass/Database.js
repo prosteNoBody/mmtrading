@@ -4,6 +4,8 @@ const uuid = require('uuid');
 const User = require('../models/User');
 const Offer = require('../models/Offer');
 
+const OFFER_STATE = require('../types/OfferState');
+
 const STEAM_TRADE_LINK = "https://steamcommunity.com/tradeoffer/new/";
 const STEAM_LINK_PARAM_PARTNER = "partner=";
 const STEAM_LINK_PARAM_TOKEN = "token=";
@@ -43,20 +45,72 @@ class Database{
         }).catch(() => {return {error: 99}});
     }
 
-    async createNewOffer(steamid, offerid, items, price) {
+    async createNewOffer(steamid, tradeid, items, price) {
         return new Promise((resolve, reject) => {
             new Offer({
-                offer_id: offerid,
+                id: uuid.v4(),
+                trade_id: tradeid,
                 user_id: steamid,
                 items: items,
                 price: price,
-                time: (new Date()).toISOString(),
-                link: uuid.v4(),
-                status: 0,
+                date: (new Date()).toISOString(),
+                status: OFFER_STATE.INITAL_CREATE,
             }).save().then( offer => {
-                return resolve(offer.link);
+                return resolve(offer.id);
             })
         })
+    }
+
+    async getOfferFromTradeId(tradeId) {
+        return new Promise((resolve, reject) => {
+            Offer.findOne({trade_id: tradeId}).then(offer => {
+                resolve(offer);
+            }).catch(e => console.log(e));
+        })
+    }
+
+    async setOfferStatus(tradeId, status) {
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({trade_id: tradeId}, {status: status}).then(() => {
+                resolve();
+            })
+        })
+    }
+
+    async removeActiveTradeOffer(offer_id) {
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offer_id}, {trade_id: ""}).then(() => {
+                resolve();
+            })
+        })
+    }
+
+    async checkInReceivedItems(offer_id, items) {
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offer_id}, {
+                items: items,
+                trade_id: "",
+                date: (new Date()).toISOString(),
+                status: OFFER_STATE.BOT_HOLDING,
+            }).then(() => {
+                resolve();
+            }).catch(e => console.log(e));
+        })
+    }
+
+    async getAllHoldingOffers() {
+        return new Promise((resolve, reject) => {
+            Offer.find({status: OFFER_STATE.BOT_HOLDING}).then( offers => {
+                resolve(offers);
+            }).catch(e => console.log(e));
+        })
+    }
+
+    async setOfferForWithdraw(offerId) {
+        Offer.findOneAndUpdate({id: offerId}, {
+            status: OFFER_STATE.BOT_READY,
+            date: (new Date()).toISOString(),
+        }).catch(e => console.log(e))
     }
 }
 

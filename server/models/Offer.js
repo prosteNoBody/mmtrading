@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const OfferScheme = new Schema({
-    offer_id:String,
+    id: String,
+    trade_id:String,
     user_id: String,
+    buyer_id: String,
     items: [String],
     price: Number,
-    time: String,
-    link: String,
+    date: String,
     status: Number,
 });
 

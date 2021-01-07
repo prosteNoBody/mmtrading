@@ -4,6 +4,8 @@ const SteamCommunity = require('steamcommunity');
 const TradeOfferManager = require('steam-tradeoffer-manager');
 const SteamId = require('steamid')
 
+const CANCEL_TIME_IN_MINUTES = 2;
+
 const DOTA_APP_ID = 570;
 const CONTEXT_ID = 2;
 
@@ -26,7 +28,8 @@ class SteamBot {
         this.manager = new TradeOfferManager({
             steam: this.client,
             community: this.community,
-            language: 'en'
+            language: 'en',
+            cancelTime: CANCEL_TIME_IN_MINUTES * 60 * 1000,
         });
 
         //login

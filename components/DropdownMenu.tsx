@@ -85,7 +85,7 @@ const DropdownMenu: React.FC<Props> = (props) => {
         <ContainerTranslate>
             <Container open={isOpen}>
                 <DropdownItem color={'--color-arcana'}>{persona}</DropdownItem>
-                <DropdownItem color={'--color-rare'}>Credit: {credit}</DropdownItem>
+                <DropdownItem color={'--color-rare'}>Credit: {credit}€</DropdownItem>
                 <Link href={"/auth/logout"}><DropdownItemLogout color={'--color-ancient'}>Log Out</DropdownItemLogout></Link>
             </Container>
         </ContainerTranslate>

@@ -117,6 +117,8 @@ type Props = {
     persona?:string;
     items: Item[];
     link?: string;
+    offerWasCreated: (link:string) => void;
+    refetchItems: () => void;
 }
 
 type CreateOfferVars = {
@@ -142,11 +144,12 @@ const CREATE_OFFER__REQUEST = gql`
 
 const OfferSubmitter: React.FC<Props> = (props) => {
     const { addToast } = useToasts();
-    const {items, avatar, persona} = props;
+    const {items, avatar, persona, offerWasCreated, refetchItems} = props;
     const [price,setPrice] = useState("");
 
     const editPrice = (event) => {
         setPrice(event.target.value.replace(",",".").replace(/[^0-9.]/g, ""));
+
     };
 
     const generateProfileInfo = (avatar, persona) => {
@@ -170,12 +173,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
         },
         onCompleted: data => {
             if(data.createOffer?.success) {
-                if(data.createOffer?.link)
-                    console.log(data.createOffer.link);
-                addToast("Offer was successfully created, bot will send you trade offer soon", {
-                    autoDismiss: true,
-                    appearance: 'success'
-                })
+                offerWasCreated(data.createOffer.link);
             } else {
                 let errorMsg = "There was an error while creating offer";
                 if(data.createOffer?.error){
@@ -187,6 +185,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
                             errorMsg = "You need to set valid trade url"
                             break;
                         case 3:
+                            refetchItems();
                             errorMsg = "There was problem with your items/inventory"
                             break;
                         case 4:
@@ -221,6 +220,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
             const itemsToSend = items.map(item => {
                 return item.assetid.toString();
             })
+            setPrice((Math.round(Number(price) * 100)/100).toString());
             createOfferQuery({variables: {items: itemsToSend, price}})
         }
     }
@@ -230,7 +230,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
             <SemiContainer>
                 {generateProfileInfo(avatar,persona)}
                 <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
-                <PriceEditor price={price ? price : ""} editPrice={editPrice}/>
+                <PriceEditor price={price ? price : ""} editPrice={editPrice} sendOffer={sendItems}/>
                 <LazyLoadingButton small={true} isLoading={loading} displayedText="ODESLAT" action={() => {sendItems()}}/>
             </SemiContainer>
         </Container>

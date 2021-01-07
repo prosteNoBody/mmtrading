@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
+import { useRouter } from 'next/router';
 
 import {useLazyQuery, useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
@@ -88,6 +89,7 @@ const ITEM_REQUEST = gql`
 `;
 const OfferEditor: React.FC<Props> = (props) => {
     const { addToast } = useToasts();
+    const router = useRouter();
     const {persona,avatar} = props;
     const [errorMessage,setErrorMessage] = useState("");
 
@@ -165,13 +167,23 @@ const OfferEditor: React.FC<Props> = (props) => {
         setInventoryItems(sortItems([...inventory.filter(item => item.assetid === id),...inventoryItems]));
         setOfferItems(offerItems.filter(item => item.assetid !== id));
     };
+    const redirectAfterCreatingOffer = (link) => {
+        addToast("Offer was succesfully created, bot will send you offer soon", {
+            autoDismiss: true,
+            appearance: 'success',
+        });
+        return;
+        setOfferItems([]);
+        setInventoryItems([]);
+        router.push('/offer/' + link).then();
+    }
 
     return (
         <Container>
             <ItemsManagerPaged isLoading={loading} error={errorMessage} items={inventoryItems} action={moveToOffer} gridSelector={'inventory'} createDescriptions={true} itemsPerPage={100}/>
             <ItemsManager items={offerItems} action={moveToInventory} gridSelector={'offer'} createDescriptions={true} itemSize={'100px'}/>
             <ControlsManager refreshAction={refreshItems} emptyAction={emptyOffer} fullAction={emptyInventory}/>
-            <OfferSubmitter items={offerItems} persona={persona} avatar={avatar}/>
+            <OfferSubmitter items={offerItems} persona={persona} avatar={avatar} offerWasCreated={redirectAfterCreatingOffer} refetchItems={refreshItems}/>
         </Container>
     );
 };

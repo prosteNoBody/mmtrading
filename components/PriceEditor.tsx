@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import styled from 'styled-components'
+import {sendData} from "next/dist/next-server/server/api-utils";
 
 const Container = styled.div`
   grid-area: price;
@@ -41,14 +42,21 @@ const CurrencySign = styled.div`
 type Props = {
     price: number | string;
     editPrice: (event) => void;
+    sendOffer: () => void;
 }
 const PriceEditor: React.FC<Props> = (props) => {
-    const {price,editPrice} = props;
+    const {price, editPrice, sendOffer} = props;
+
+    const handleKeyDown = e => {
+        if(e.keyCode === 13) {
+            sendOffer();
+        }
+    }
 
     return (
         <Container>
             <Wrapper>
-                <PriceInput size={1} value={price} onChange={(e) => editPrice(e)} placeholder={'0'}/>
+                <PriceInput size={1} value={price} onChange={(e) => editPrice(e)} placeholder={'0'} onKeyDown={handleKeyDown}/>
                 <CurrencySign>€</CurrencySign>
             </Wrapper>
         </Container>
