@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server/server.js",
-    "dev:nodemon": "nodemon --watch server/server.js server/server.js",
+    "dev:nodemon": "nodemon --watch server server/server.js",
     "genAuth": "node genAuthKey",
     "build": "next build",
     "start": "NODE_ENV=production node server.js"

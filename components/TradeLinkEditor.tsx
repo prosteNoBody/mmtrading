@@ -62,6 +62,13 @@ const TradeLinkUrl = styled.a`
   text-underline: none;
 `;
 
+const TradeLinkTitle = styled.div`
+  margin-bottom: 1rem;
+  
+  color: var(--color-white);
+  font-size: 2rem;
+`;
+
 type Props = {
     action: () => void;
 }
@@ -155,6 +162,7 @@ const TradeLinkEditor: React.FC<Props> = (props) => {
 
     return(
         <Container isLoading={loading}>
+            <TradeLinkTitle>Trade link</TradeLinkTitle>
             <InputUrl ref={inputEl} placeholder="Trade Link" value={tradeUrl} onChange={e => setTradeUrl(e.target.value)} onFocus={e => e.target.select()} onKeyDown={handleKeyDown} disabled={loading}/>
             <LazyLoadingButton isLoading={loading} displayedText={"Update"} action={() => refetchData()}/>
             <TradeLinkUrl href={tradeLinkUrl} target="_blank">Where get trade link?</TradeLinkUrl>

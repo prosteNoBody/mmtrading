@@ -196,6 +196,10 @@ const OfferSubmitter: React.FC<Props> = (props) => {
                             break;
                         case 6:
                             errorMsg = "There was problem in sending you an offer, check if you don't have VAC/Trade ban"
+                            break;
+                        case 7:
+                            errorMsg = "You can have only one waiting offer at the time"
+                            break
                     }
                 }
                 addToast(errorMsg, {

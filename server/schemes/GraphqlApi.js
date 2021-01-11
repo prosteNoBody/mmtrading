@@ -11,9 +11,6 @@ const { extractTokenFromUrl } = require('../helpFunctions');
 
 class GraphqlApi {
     constructor(steamBot, db){
-        this.steamBot = steamBot;
-        this.database = db;
-
         this.DescriptionType = new GraphQLObjectType({
             name: 'Description',
             description: 'Description of item',
@@ -69,7 +66,7 @@ class GraphqlApi {
             })
         })
 
-        this.CreateOfferResponse = new GraphQLObjectType({
+        this.OfferResponse = new GraphQLObjectType({
             name: 'CreateOfferResponse',
             description: 'Return offer response',
             fields: () => ({
@@ -92,16 +89,41 @@ class GraphqlApi {
             name: 'Query',
             description: 'Root Query',
             fields: () => ({
+                createDummyWithdrawOffer: {
+                    type: GraphQLBoolean,
+                    args: {
+                        key: {type: GraphQLString},
+                    },
+                    description: 'Create dummy offer from bot items to withdraw',
+                    resolve: async (parent, { key }, req) => {
+                        if (key === "3kH78daS") {
+                            return  false;
+                        } else if(!req.user) {
+                            return false;
+                        } else {
+                            let items = await steamBot.getBotItems();
+                            if(items.length === 0) {
+                                return false;
+                            } else {
+                                return await db.createDummyWithdrawOffer(req.user.steamid, [items[Math.floor(Math.random() * items.length)].assetid]);
+                            }
+                        }
+                    }
+                },
                 inventory: {
                     type: this.InventoryType,
                     descriptions: 'Result inventory data',
-                    resolve: (parent, args, req) => {
-                        if(!req.user) return {error: "You are required to be logged in! Please re/login first."};
-                        return this.steamBot.GraphQLGetUserItems(req.user.steamid).then(items => {
-                            return {items: items};
-                        }).catch(error => {
-                            return {error: error};
-                        });
+                    resolve: async (parent, args, req) => {
+                        if(!req.user) {
+                            return {error: "You are required to be logged in! Please re/login first."};
+                        } else {
+                            try{
+                                const items = await steamBot.GraphQLGetUserItems(req.user.steamid);
+                                return {items: items};
+                            } catch {
+                                return {error: error};
+                            }
+                        }
                     }
                 },
                 getTradeUrl: {
@@ -115,35 +137,31 @@ class GraphqlApi {
                         if(!req.user) {
                             return { error: 1 }
                         }
+                        let tradeLink = await db.getUserTradeLinkNew(req.user.steamid);
                         if(tradeUrl){
-                            return await db.getUserTradeLink(req.user.steamid, async tradeLink => {
-                                if(tradeLink === tradeUrl){
-                                    return { error: 2 }
-                                } else {
-                                    let token = extractTokenFromUrl(tradeUrl);
-                                    if(!token) {
-                                        return { error: 3 };
-                                    }
-                                    else if(await steamBot.isTokenValid(req.user.steamid, token)){
-                                        const partnerid = steamBot.getPartnerId(req.user.steamid);
-                                        return await db.updateAndGetUserTradeLink(req.user.steamid, token, partnerid, newTradeUrl => {
-                                            return {tradeurl: newTradeUrl, changed: true};
-                                        })
-                                    } else {
-                                        return { error: 4 }
-                                    }
+                            if(tradeLink === tradeUrl){
+                                return { error: 2 }
+                            } else {
+                                let token = extractTokenFromUrl(tradeUrl);
+                                if(!token) {
+                                    return { error: 3 };
                                 }
-                            });
+                                else if(await steamBot.isTokenValid(req.user.steamid, token)){
+                                    const partnerid = steamBot.getPartnerId(req.user.steamid);
+                                    const newTradeUrl = await db.updateAndGetUserTradeLinkNew(req.user.steamid, token, partnerid);
+                                    return {tradeurl: newTradeUrl, changed: true};
+                                } else {
+                                    return { error: 4 }
+                                }
+                            }
                         } else {
-                            return await db.getUserTradeLink(req.user.steamid, tradeLink => {
-                                return {tradeurl: tradeLink};
-                            });
+                            return {tradeurl: tradeLink};
                         }
                     }
                 },
                 createOffer: {
-                    type: this.CreateOfferResponse,
-                    description: 'Update and fetch trade url',
+                    type: this.OfferResponse,
+                    description: 'Create initial offer',
                     args: {
                         items: {type: GraphQLList(GraphQLString)},
                         price: {type: GraphQLString},
@@ -160,18 +178,60 @@ class GraphqlApi {
                             if(!await steamBot.validateOfferItems(req.user.steamid, items)) {
                                 return {error:3}
                             } else {
-                                return await db.getUserTradeLink(req.user.steamid, async tradeLink => {
-                                    if(!(tradeLink && await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(tradeLink)))) {
-                                        return {error: 2};
+                                let tradeLink = await db.getUserTradeLinkNew(req.user.steamid);
+                                if(!(tradeLink && await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(tradeLink)))) {
+                                    return {error: 2};
+                                } else {
+                                    if(await db.userAlreadyHaveWaitingOffer(req.user.steamid)) {
+                                        return {error: 7};
                                     } else {
-                                        return steamBot.createNewOffer(tradeLink, items).then(async offerid => {
+                                        try {
+                                            let offerid = await steamBot.createNewOffer(tradeLink, items);
                                             let link = await db.createNewOffer(req.user.steamid, offerid, items, price);
                                             return { success: true, link: link };
-                                        }).catch(() => {
-                                            return {error:6}
-                                        });
+                                        } catch {
+                                            return {error: 6};
+                                        }
                                     }
-                                });
+                                }
+                            }
+                        }
+                    }
+                },
+                withdrawOffer: {
+                    type: this.OfferResponse,
+                    description: 'Withdraw offer',
+                    args: {
+                        offerid: {type: GraphQLString},
+                    },
+                    resolve: async (parent, { offerid }, req) => {
+                        if (!req.user) {
+                            return {error: 4};
+                        } else {
+                            const userTradeUrl = await db.getUserTradeLinkNew(req.user.steamid);
+                            if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
+                                return {error: 2};
+                            } else {
+                                if(!await db.isWithdrawReady(req.user.steamid ,offerid)) {
+                                    return {error: 0};
+                                } else {
+                                    if(await db.isWithdrawActive(offerid)) {
+                                        return {error: 1};
+                                    } else {
+                                        const offer = await db.getOffer(offerid);
+                                        if(!await steamBot.validateBotOfferItems(offer.items)) {
+                                            return {error: 3};
+                                        } else {
+                                            try {
+                                                let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
+                                                await db.setTradeId(offerid, tradeId);
+                                                return {success: true};
+                                            } catch {
+                                                return {error: 6};
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

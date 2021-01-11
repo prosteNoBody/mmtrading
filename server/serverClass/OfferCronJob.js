@@ -18,27 +18,30 @@ class OfferCronJob {
         });
     }
     initEventsWhenReady() {
-        this.steamBot.manager.on('newOffer', offer => {
-            offer.decline();
+        this.steamBot.manager.on('newOffer', trade => {
+            trade.decline();
         })
         this.steamBot.manager.on('sentOfferChanged', async (trade, oldOfferState) => {
-            console.log(trade.state);
             const offer = await this.db.getOfferFromTradeId(trade.id);
             if(trade.state === TRADE_STATE.Accepted) {
-                if(offer.status === OFFER_STATE.INITAL_CREATE) {
+                if(offer.status === OFFER_STATE.INITIAL_CREATE) {
                     trade.getExchangeDetails(false, (err, status, tradeInitTime, receivedItems, sentItems) => {
                         for(let receivedItem of receivedItems) {
                             offer.items[offer.items.indexOf(receivedItem.assetid)] = receivedItem.new_assetid;
                         }
                         this.db.checkInReceivedItems(offer.id, offer.items);
-                    })
+                    });
                 } else if(offer.status === OFFER_STATE.BOT_READY) {
-
+                    await this.db.setOfferAsWithdraw(offer.id);
                 }
-            } else if(trade.state !== TRADE_STATE.InEscrow && trade.state !== TRADE_STATE.InvalidItems) {
-                if(offer.status === OFFER_STATE.INITAL_CREATE) {
-                    await this.db.setOfferStatus(trade.id, OFFER_STATE.OFFER_CANCELED);
+            } else if(trade.state !== TRADE_STATE.InEscrow) {
+                if(offer.status === OFFER_STATE.INITIAL_CREATE) {
+                    await this.db.setInitialOfferStatus(trade.id, OFFER_STATE.OFFER_CANCELED);
+                } else if (offer.status === OFFER_STATE.BOT_READY) {
+                    await this.db.clearTradeId(offer.id);
                 }
+            } else {
+                trade.decline();
             }
         })
     }
@@ -50,7 +53,6 @@ class OfferCronJob {
     }
     async checkIfOffersReady() {
         let offers = await this.db.getAllHoldingOffers();
-        console.log(offers);
         for(let offer of offers) {
             let daysBetween = (new Date().getTime() - new Date(offer.date).getTime()) / (1000 * 60 * 60 * 24);
             if(daysBetween > 7) {
