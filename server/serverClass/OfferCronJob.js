@@ -33,11 +33,13 @@ class OfferCronJob {
                     });
                 } else if(offer.status === OFFER_STATE.BOT_READY) {
                     await this.db.setOfferAsWithdraw(offer.id);
+                } else if(offer.status === OFFER_STATE.BUYER_PAY) {
+                    await this.db.setOfferAsCompleted(offer.id);
                 }
             } else if(trade.state !== TRADE_STATE.InEscrow) {
                 if(offer.status === OFFER_STATE.INITIAL_CREATE) {
                     await this.db.setInitialOfferStatus(trade.id, OFFER_STATE.OFFER_CANCELED);
-                } else if (offer.status === OFFER_STATE.BOT_READY) {
+                } else if (offer.status === OFFER_STATE.BOT_READY || offer.status === OFFER_STATE.BUYER_PAY) {
                     await this.db.clearTradeId(offer.id);
                 }
             } else {

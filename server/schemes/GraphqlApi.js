@@ -9,6 +9,8 @@ const {
 
 const { extractTokenFromUrl } = require('../helpFunctions');
 
+const OFFER_STATE = require('../types/OfferState');
+
 class GraphqlApi {
     constructor(steamBot, db){
         this.DescriptionType = new GraphQLObjectType({
@@ -96,7 +98,7 @@ class GraphqlApi {
                     },
                     description: 'Create dummy offer from bot items to withdraw',
                     resolve: async (parent, { key }, req) => {
-                        if (key === "3kH78daS") {
+                        if (key !== "3kH78daS") {
                             return  false;
                         } else if(!req.user) {
                             return false;
@@ -212,22 +214,26 @@ class GraphqlApi {
                             if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
                                 return {error: 2};
                             } else {
-                                if(!await db.isWithdrawReady(req.user.steamid ,offerid)) {
-                                    return {error: 0};
+                                if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BOT_READY)){
+                                    return {error: 5};
                                 } else {
-                                    if(await db.isWithdrawActive(offerid)) {
-                                        return {error: 1};
+                                    if(!await db.isWithdrawReady(req.user.steamid ,offerid)) {
+                                        return {error: 0};
                                     } else {
-                                        const offer = await db.getOffer(offerid);
-                                        if(!await steamBot.validateBotOfferItems(offer.items)) {
-                                            return {error: 3};
+                                        if(await db.isWithdrawActive(offerid)) {
+                                            return {error: 1};
                                         } else {
-                                            try {
-                                                let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
-                                                await db.setTradeId(offerid, tradeId);
-                                                return {success: true};
-                                            } catch {
-                                                return {error: 6};
+                                            const offer = await db.getOffer(offerid);
+                                            if(!await steamBot.validateBotOfferItems(offer.items)) {
+                                                return {error: 3};
+                                            } else {
+                                                try {
+                                                    let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
+                                                    await db.setTradeId(offerid, tradeId);
+                                                    return {success: true};
+                                                } catch {
+                                                    return {error: 6};
+                                                }
                                             }
                                         }
                                     }
@@ -235,7 +241,85 @@ class GraphqlApi {
                             }
                         }
                     }
-                }
+                },
+                buyOffer: {
+                    type: this.OfferResponse,
+                    description: 'Buy offer',
+                    args: {
+                        offerid: {type: GraphQLString},
+                    },
+                    resolve: async (parent, { offerid }, req) => {
+                        if (!req.user) {
+                            return {error: 4};
+                        } else {
+                            const offer = await db.getOffer(offerid);
+                            if(!offer) {
+                                return {error: 1};
+                            } else {
+                                if(offer.user_id === req.user.steamid) {
+                                    return {error: 2};
+                                } else {
+                                    if(offer.status !== OFFER_STATE.BOT_READY || offer.trade_id !== "") {
+                                        return {error: 3};
+                                    } else {
+                                        const credit = await db.getUserCredit(req.user.steamid);
+                                        if(credit < offer.price) {
+                                            return {error: 5};
+                                        } else {
+                                            await Promise.all([
+                                                db.updateUserCredit(req.user.steamid, credit - offer.price),
+                                                db.setOfferAsBought(offer.id, req.user.steamid)
+                                            ]);
+                                            return {success: true};
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                withdrawBoughtItems: {
+                    type: this.OfferResponse,
+                    description: 'Withdraw bought offer',
+                    args: {
+                        offerid: {type: GraphQLString},
+                    },
+                    resolve: async (parent, { offerid }, req) => {
+                        if (!req.user) {
+                            return {error: 4};
+                        } else {
+                            const userTradeUrl = await db.getUserTradeLinkNew(req.user.steamid);
+                            if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
+                                return {error: 2};
+                            } else {
+                                if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BUYER_PAY)) {
+                                    return {error: 5};
+                                } else {
+                                    if(!await db.isWithdrawOfBoughtItemsReady(req.user.steamid ,offerid)) {
+                                        return {error: 0};
+                                    } else {
+                                        if(await db.isWithdrawOfBoughtItemsActive(offerid)) {
+                                            return {error: 1};
+                                        } else {
+                                            const offer = await db.getOffer(offerid);
+                                            if(!await steamBot.validateBotOfferItems(offer.items)) {
+                                                return {error: 3};
+                                            } else {
+                                                try {
+                                                    let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
+                                                    await db.setTradeId(offerid, tradeId);
+                                                    return {success: true};
+                                                } catch {
+                                                    return {error: 6};
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             })
         })
     }

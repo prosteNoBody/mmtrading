@@ -39,6 +39,7 @@ class Database{
                 id: uuid.v4(),
                 trade_id: "",
                 user_id: steamid,
+                buyer_id: "",
                 items: items,
                 price: Math.ceil(Math.random() * 20),
                 date: (new Date()).toISOString(),
@@ -50,6 +51,24 @@ class Database{
                 reject(false);
             });
         });
+    }
+
+    async getUserCredit(steamid) {
+        return new Promise((resolve, reject) => {
+            User.findOne({steamid:steamid}).then(user => {
+                resolve(user.credit);
+            }).catch(e => console.log(e));
+        });
+    }
+
+    async updateUserCredit(steamid, newCredit) {
+        return new Promise((resolve, reject) => {
+            User.findOneAndUpdate({steamid: steamid}, {
+                credit: newCredit,
+            }).then(() => {
+                resolve();
+            }).catch(e => console.log(e));
+        })
     }
 
     async getUserTradeLink(steamid, cb) {
@@ -90,6 +109,7 @@ class Database{
                 id: uuid.v4(),
                 trade_id: tradeid,
                 user_id: steamid,
+                buyer_id: "",
                 items: items,
                 price: price,
                 date: (new Date()).toISOString(),
@@ -98,21 +118,6 @@ class Database{
                 return resolve(offer.id);
             }).catch(e => console.log(e));
         })
-    }
-
-    async userAlreadyHaveTypeOffer(steamid, offer_type) {
-        return new Promise((resolve, reject) => {
-            Offer.find({
-                user_id: steamid,
-                status: offer_type,
-            }).then( offers => {
-                if(offers.length === 0) {
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            }).catch(e => console.log(e));
-        });
     }
 
     async userAlreadyHaveWaitingOffer(steamid) {
@@ -128,6 +133,22 @@ class Database{
                 }
             }).catch(e => console.log(e));
         });
+    }
+
+    async userAlreadyHaveActiveTrade(steamid, offerType) {
+        return new Promise((resolve, reject) => {
+            Offer.find({
+                user_id: steamid,
+                status: offerType,
+            }).then( offers => {
+                for(const offer of offers) {
+                    if(offer.trade_id !== "") {
+                        resolve(true);
+                    }
+                }
+                resolve(false);
+            }).catch(e => console.log(e))
+        })
     }
 
     async userAlreadyHaveWithdrawOffer(steamid) {
@@ -170,14 +191,6 @@ class Database{
         });
     }
 
-    async removeActiveTradeOffer(offer_id) {
-        return new Promise((resolve, reject) => {
-            Offer.findOneAndUpdate({id: offer_id}, {trade_id: ""}).then(() => {
-                resolve();
-            })
-        })
-    }
-
     async checkInReceivedItems(offer_id, items) {
         return new Promise((resolve, reject) => {
             Offer.findOneAndUpdate({id: offer_id}, {
@@ -206,10 +219,23 @@ class Database{
         }).catch(e => console.log(e))
     }
 
+    async setOfferAsBought(offerId, buyerId) {
+        Offer.findOneAndUpdate({id: offerId}, {
+            status: OFFER_STATE.BUYER_PAY,
+            buyer_id: buyerId,
+        }).catch(e => console.log(e));
+    }
+
     async setOfferAsWithdraw(offerId) {
         Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.BUYER_TAKE
+            status: OFFER_STATE.USER_WITHDRAW
         }).catch(e => console.log(e))
+    }
+
+    async setOfferAsCompleted(offerId) {
+        Offer.findOneAndUpdate({id: offerId}, {
+            status: OFFER_STATE.COMPLETED,
+        }).catch(e => console.log(e));
     }
 
     async isWithdrawReady(steamId ,offerId) {
@@ -228,6 +254,35 @@ class Database{
     }
 
     async isWithdrawActive(offerId) {
+        return new Promise((resolve, reject) => {
+            Offer.findOne({
+                id: offerId,
+            }).then(offer => {
+                if(!offer || offer.trade_id === "") {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            }).catch(e => console.log(e));
+        });
+    }
+
+    async isWithdrawOfBoughtItemsReady(steamId ,offerId) {
+        return new Promise((resolve, reject) => {
+            Offer.findOne({
+                id: offerId,
+                buyer_id: steamId,
+            }).then(offer => {
+                if(!offer || offer.status !== OFFER_STATE.BUYER_PAY) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            }).catch(e => console.log(e));
+        });
+    }
+
+    async isWithdrawOfBoughtItemsActive(offerId) {
         return new Promise((resolve, reject) => {
             Offer.findOne({
                 id: offerId,
