@@ -262,12 +262,14 @@ class GraphqlApi {
                                     if(offer.status !== OFFER_STATE.BOT_READY || offer.trade_id !== "") {
                                         return {error: 3};
                                     } else {
-                                        const credit = await db.getUserCredit(req.user.steamid);
-                                        if(credit < offer.price) {
+                                        const buyerCredit = await db.getUserCredit(req.user.steamid);
+                                        if(buyerCredit < offer.price) {
                                             return {error: 5};
                                         } else {
+                                            const sellerCredit = await db.getUserCredit(offer.user_id);
                                             await Promise.all([
-                                                db.updateUserCredit(req.user.steamid, credit - offer.price),
+                                                db.updateUserCredit(req.user.steamid, buyerCredit - offer.price),
+                                                db.updateUserCredit(offer.user_id, sellerCredit + offer.price),
                                                 db.setOfferAsBought(offer.id, req.user.steamid)
                                             ]);
                                             return {success: true};
