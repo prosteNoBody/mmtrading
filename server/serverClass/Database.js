@@ -53,6 +53,22 @@ class Database{
         });
     }
 
+    async getUserOffers(steamid) {
+        return new Promise((resolve, reject) => {
+            Offer.find({user_id: steamid}).then(offers => {
+                resolve(offers);
+            }).catch(e => console.log(e));
+        });
+    }
+
+    async getBoughtOffers(steamid) {
+        return new Promise((resolve, reject) => {
+            Offer.find({buyer_id: steamid}).then(offers => {
+                resolve(offers);
+            }).catch(e => console.log(e));
+        });
+    }
+
     async getUserCredit(steamid) {
         return new Promise((resolve, reject) => {
             User.findOne({steamid:steamid}).then(user => {

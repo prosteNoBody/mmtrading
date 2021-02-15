@@ -2,9 +2,7 @@ import React, { useState, useEffect} from 'react';
 import Link from 'next/link';
 import styled from 'styled-components'
 
-interface Open{
-    open?:boolean;
-}
+import {OpenType} from './Types';
 
 const ContainerTranslate = styled.div`
     width: inherit;
@@ -24,8 +22,8 @@ const Container = styled.div`
     z-index: auto;
     filter: drop-shadow(0 0 .2rem var(--color-black));
     transform-origin: top;
-    transform: translateX(${(props:Open) => (props.open ? '0' : '20rem')});
-    opacity: ${(props:Open) => (props.open ? '1' : '0')};
+    transform: translateX(${(props:OpenType) => (props.open ? '0' : '20rem')});
+    opacity: ${(props:OpenType) => (props.open ? '1' : '0')};
     transition: transform 400ms ease-out, opacity 300ms ease-out;
 `;
 

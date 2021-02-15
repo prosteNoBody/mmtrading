@@ -3,6 +3,8 @@ import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 
+import {ItemType} from './Types';
+
 import {useLazyQuery, useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
@@ -25,26 +27,10 @@ const Container = styled.div`
   background: rgb(247,247,247);
   background: radial-gradient(circle, rgba(247,247,247,1) 0%, rgba(230,230,230,1) 100%);
 `;
-type Description = {
-    type: string;
-    value: string;
-    color?: string;
-}
-
-type Item = {
-    index:number;
-    assetid: number;
-    name: string;
-    icon_url: string;
-    rarity: string;
-    color: string;
-    descriptions: Description[];
-}
-
 type RespondData = {
     inventory?: {
         error?: string,
-        items: Item[]
+        items: ItemType[]
     };
 }
 
@@ -93,9 +79,9 @@ const OfferEditor: React.FC<Props> = (props) => {
     const {persona,avatar} = props;
     const [errorMessage,setErrorMessage] = useState("");
 
-    const [inventory,setInventory] = useState<Item[]>([]);
-    const [inventoryItems,setInventoryItems] = useState<Item[]>([]);
-    const [offerItems,setOfferItems] = useState<Item[]>([]);
+    const [inventory,setInventory] = useState<ItemType[]>([]);
+    const [inventoryItems,setInventoryItems] = useState<ItemType[]>([]);
+    const [offerItems,setOfferItems] = useState<ItemType[]>([]);
 
     const [getItemsQuery, {loading}] = useLazyQuery<RespondData>(ITEM_REQUEST, {
         fetchPolicy: "network-only",
@@ -142,7 +128,7 @@ const OfferEditor: React.FC<Props> = (props) => {
         getItemsQuery();
     },[]);
 
-    const sortItems = (array:Item[]) => {
+    const sortItems = (array:ItemType[]) => {
         return array.sort((itemA,itemB)=>(itemA.index < itemB.index) ? 1 : -1);
     };
     const refreshItems = () => {

@@ -2,6 +2,8 @@ import React, { useState, useEffect} from 'react';
 import Link from 'next/link';
 import styled from 'styled-components'
 
+import {UserType, OpenType} from './Types';
+
 import DropdownMenu from './DropdownMenu';
 
 const Container = styled.div`
@@ -21,7 +23,7 @@ const SectionProfile = styled.div`
   height: 100%;
   
   color: var(--color-black);
-  border-left: ${(props:Open) => props ? 1 : 1.5}rem solid var(--color-mythical);
+  border-left: ${(props:OpenType) => props ? 1 : 1.5}rem solid var(--color-mythical);
   
   text-align: center;
   font-size: 1.5rem;
@@ -45,10 +47,10 @@ const SectionProfileImg = styled.img`
 `;
 
 const SectionProfileArrow = styled.div`
-  margin: ${(props:Open) => (props.open ? '1.5rem 0.75rem 1.5rem 0.75rem' : '1rem 0.5rem 1rem 0.5rem')};
+  margin: ${(props:OpenType) => (props.open ? '1.5rem 0.75rem 1.5rem 0.75rem' : '1rem 0.5rem 1rem 0.5rem')};
   
   transform-origin: center;
-  transform: rotate(${(props:Open) => (props.open ? '180deg' : '0deg')});
+  transform: rotate(${(props:OpenType) => (props.open ? '180deg' : '0deg')});
   transition: transform 300ms, margin 300ms;
   
   ${SectionProfile}:hover &{
@@ -56,17 +58,9 @@ const SectionProfileArrow = styled.div`
   }
 `;
 
-interface Open{
-    open?:boolean;
-}
 
 type Props = {
-    user?: User;
-}
-type User = {
-    avatar?:string;
-    name?:string;
-    credit?:number;
+    user?: UserType;
 }
 const Profile: React.FC<Props> = (props) => {
     const {avatar,name,credit} = props.user;

@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import {ItemType} from "./Types";
+
 import Item from './Item';
 import LoadingIcon from './LoadingIcon';
 
@@ -67,42 +69,29 @@ const BottomPadding = styled.div`
   padding-bottom: 2rem;
 `;
 
-type Description = {
-    type: string;
-    value: string;
-    color?: string;
-}
-type Item = {
-    index:number;
-    assetid: number;
-    name: string;
-    icon_url: string;
-    rarity: string;
-    color: string;
-    descriptions: Description[];
-}
 type Props = {
     isLoading?: boolean;
     error?: string;
-    items:Item[];
+    items:ItemType[];
     action:(id:number) => void;
     gridSelector: string;
     createDescriptions: boolean;
     itemSize?: string;
+    emptyInventoryMessage?: string;
 }
 const ItemsManager: React.FC<Props> = (props) => {
-    const {items,action,gridSelector, createDescriptions, itemSize} = props;
+    const {items,action,gridSelector, createDescriptions, itemSize, emptyInventoryMessage} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
-    const createItem = (item:Item,action) => {
+    const createItem = (item:ItemType,action) => {
         return <Item createDescription={createDescriptions} key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action} itemSize={itemSize}/>
     };
 
     const generateItems = () => {
         if(isLoading) return <InsideText>Loading... <LoadingIcon/></InsideText>;
         else if(error) return <InsideText>{error}</InsideText>;
-        else if(!items[0]) return <InsideText>No items...</InsideText>;
+        else if(!items[0]) return <InsideText>{emptyInventoryMessage || 'No items...'}</InsideText>;
         return <ItemsContainer>{items.map((item) => createItem(item,action))}<BottomPadding/></ItemsContainer>
     };
 

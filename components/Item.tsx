@@ -183,6 +183,8 @@ const Description = styled.div`
   
   color: #${(props: ContainerProps) => props.rarityColor};
   
+  text-align: left;
+  
   font-size: 0.8rem;
 `;
 const LoadingI = styled.i`
@@ -243,7 +245,9 @@ const Item: React.FC<Props> = (props) => {
 
     const createDescriptions = (descriptions) => {
         return descriptions.map((description:Description,index:number) => {
-            return <Description key={assetid + index} rarityColor={description.color} dangerouslySetInnerHTML={{__html:description.value}}/>
+            return <Description key={assetid + index} rarityColor={description.color} dangerouslySetInnerHTML={{
+                __html:description.value.replace(/color: rgb\(255, 255, 255\)/gm, 'rgb(0, 0, 0)')
+            }}/>
         });
     };
     const createDetails = () => {

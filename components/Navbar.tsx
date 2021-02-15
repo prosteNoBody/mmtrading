@@ -2,6 +2,8 @@ import React, { useState, useEffect} from 'react';
 import Link from 'next/link';
 import styled from 'styled-components'
 
+import {UserType} from './Types';
+
 import Profile from './Profile';
 import Section from './Section';
 
@@ -31,12 +33,7 @@ const SteamLoginWrapper = styled.div`
 `;
 
 type Props = {
-    user?: User;
-}
-type User = {
-    avatar?:string;
-    name?:string;
-    credit?:number;
+    user?: UserType;
 }
 
 const Navbar: React.FC<Props> = (props) => {

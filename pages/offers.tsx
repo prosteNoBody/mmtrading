@@ -1,4 +1,3 @@
-import Link from "next/link";
 import * as React from "react";
 import Head from "next/head";
 import {IncomingMessage} from "http";
@@ -8,8 +7,7 @@ import {UserType} from '../components/Types';
 
 import MainContainer from "../components/MainContainer";
 import Navbar from "../components/Navbar";
-import SettingsEditor from "../components/SettingsEditor";
-import OfferEditor from "../components/OfferEditor";
+import OffersListEditor from "../components/OffersListEditor";
 
 type Props = {
     user?: UserType;
@@ -21,10 +19,10 @@ const dashboard = (props:Props) => {
     return (
         <MainContainer>
             <Head>
-                <title>MMTrading | Settings</title>
+                <title>MMTrading | Offers</title>
             </Head>
             <Navbar user={user}/>
-            <SettingsEditor/>
+            <OffersListEditor/>
         </MainContainer>
     );
 };

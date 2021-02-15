@@ -4,7 +4,8 @@ const {
     GraphQLInt,
     GraphQLString,
     GraphQLList,
-    GraphQLBoolean
+    GraphQLBoolean,
+    GraphQLFloat
 } = require('graphql');
 
 const { extractTokenFromUrl } = require('../helpFunctions');
@@ -75,6 +76,30 @@ class GraphqlApi {
                 error: {type: GraphQLInt},
                 success: {type: GraphQLBoolean},
                 link: {type: GraphQLString}
+            })
+        })
+
+        this.Offer = new GraphQLObjectType({
+            name: 'Offer',
+            description: 'Return offer object',
+            fields: () => ({
+                id: {type: GraphQLString},
+                user_id: {type: GraphQLString},
+                buyer_id: {type: GraphQLString},
+                trade_id: {type: GraphQLString},
+                price: {type: GraphQLFloat},
+                items: {type: GraphQLList(this.ItemType)},
+                date: {type: GraphQLString},
+                status: {type: GraphQLInt},
+            })
+        })
+
+        this.AllOffersResolve = new GraphQLObjectType({
+            name: 'OffersResolve',
+            description: 'Return resolve for all offers',
+            fields: () => ({
+                error: {type: GraphQLInt},
+                offers: {type: GraphQLList(this.Offer)}
             })
         })
 
@@ -318,6 +343,39 @@ class GraphqlApi {
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                },
+                getAllOffers: {
+                    type: this.AllOffersResolve,
+                    description: 'Get all offers owned by user',
+                    args: {
+                        method: {type: GraphQLBoolean},
+                    },
+                    resolve: async (parent, {method}, req) => {
+                        if (!req.user) {
+                            return {error: 1};
+                        } else {
+                            try {
+                                let offers = method ? (await db.getUserOffers(req.user.steamid)) : (await db.getBoughtOffers(req.user.steamid));
+                                let botItems = await steamBot.getBotItems();
+                                let resOffer = [];
+                                for(let offer of offers) {
+                                    resOffer.push({
+                                        id: offer.id,
+                                        user_id: offer.user_id,
+                                        buyer_id: offer.buyer_id,
+                                        trade_id: offer.trade_id,
+                                        price: offer.price,
+                                        items: botItems.filter(item => offer.items.includes(item.assetid)),
+                                        date: offer.date,
+                                        status: offer.status,
+                                    })
+                                }
+                                return {offers: resOffer};
+                            } catch {
+                                return {error: 2};
                             }
                         }
                     }

@@ -2,7 +2,9 @@ import React, {useState} from 'react';
 import styled from 'styled-components'
 import { useToasts } from 'react-toast-notifications';
 
-import ItemManager from './ItemsManager';
+import {ItemType} from "./Types";
+
+import ItemsManager from './ItemsManager';
 import PriceEditor from './PriceEditor';
 import LazyLoadingButton from "./LazyLoadingButton";
 import {useLazyQuery} from "@apollo/react-hooks";
@@ -98,24 +100,10 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-type Item = {
-    index:number;
-    assetid: number;
-    name: string;
-    icon_url: string;
-    rarity: string;
-    color: string;
-    descriptions: {
-        type: string;
-        value: string;
-        color?: string;
-    }[];
-}
-
 type Props = {
     avatar?:string;
     persona?:string;
-    items: Item[];
+    items: ItemType[];
     link?: string;
     offerWasCreated: (link:string) => void;
     refetchItems: () => void;
@@ -233,7 +221,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
         <Container>
             <SemiContainer>
                 {generateProfileInfo(avatar,persona)}
-                <ItemManager items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
+                <ItemsManager emptyInventoryMessage="Offer preview" items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
                 <PriceEditor price={price ? price : ""} editPrice={editPrice} sendOffer={sendItems}/>
                 <LazyLoadingButton small={true} isLoading={loading} displayedText="ODESLAT" action={() => {sendItems()}}/>
             </SemiContainer>

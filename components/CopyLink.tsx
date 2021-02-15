@@ -10,8 +10,8 @@ const Container = styled.div`
   margin: 1rem 0;
   padding: 0.3rem;
   
-  background: var(--color-black);
-  color: var(--color-immortal);
+  background: var(--color-immortal);
+  color: var(--color-white);
   
   user-select: all;
   cursor: pointer;
@@ -19,15 +19,16 @@ const Container = styled.div`
 `;
 
 type Props = {
-    link?: string;
+    offerId?: string;
 }
 
 const CopyLink: React.FC<Props> = (props) => {
-    const {link} = props;
+    const {offerId} = props;
+    const MMTRADING_OFFER_URL = window.location + "/offer/";
 
     return (
         <Container>
-            {link}
+            {MMTRADING_OFFER_URL + offerId}
         </Container>
     )
 };

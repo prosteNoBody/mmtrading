@@ -1,13 +1,15 @@
 import * as React from "react";
 import Head from "next/dist/next-server/lib/head";
 
+import {UserType} from '../components/Types';
+
 import MainContainer from "../components/MainContainer";
 import Navbar from "../components/Navbar";
 import { GetServerSideProps } from 'next'
 import {IncomingMessage} from "http";
 
 type Props = {
-    user?: User;
+    user?: UserType;
 }
 const indexPage = (props:Props) => {
     const {user} = props;
@@ -22,12 +24,7 @@ const indexPage = (props:Props) => {
 };
 
 interface ReqUser extends IncomingMessage{
-    user?:User;
-}
-type User = {
-    name:string;
-    avatar:string;
-    credit:number;
+    user?:UserType;
 }
 
 export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}) =>{

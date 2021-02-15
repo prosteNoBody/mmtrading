@@ -2,6 +2,8 @@ import * as React from "react";
 import Head from 'next/head';
 import styled from 'styled-components'
 
+import {UserType} from '../components/Types';
+
 import { GetServerSideProps } from 'next'
 import {IncomingMessage} from "http";
 
@@ -10,7 +12,7 @@ import Navbar from '../components/Navbar';
 import OfferEditor from "../components/OfferEditor";
 
 type Props = {
-    user?: User;
+    user?: UserType;
 }
 const dashboard = (props:Props) => {
     const {user} = props;
@@ -28,12 +30,7 @@ const dashboard = (props:Props) => {
 };
 
 interface ReqUser extends IncomingMessage{
-    user?:User;
-}
-type User = {
-    name:string;
-    avatar:string;
-    credit:number;
+    user?:UserType;
 }
 
 export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}) =>{
