@@ -13,7 +13,7 @@
     "@apollo/react-common": "^3.1.4",
     "@apollo/react-hooks": "^3.1.5",
     "apollo-boost": "^0.4.9",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "connect-mongodb-session": "^2.4.1",
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
