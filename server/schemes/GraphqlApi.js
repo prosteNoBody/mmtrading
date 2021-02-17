@@ -8,6 +8,7 @@ const {
     GraphQLFloat
 } = require('graphql');
 
+const {createDummyOfferKey} = require('../keys.json');
 const { extractTokenFromUrl } = require('../helpFunctions');
 
 const OFFER_STATE = require('../types/OfferState');
@@ -124,7 +125,7 @@ class GraphqlApi {
                     },
                     description: 'Create dummy offer from bot items to withdraw',
                     resolve: async (parent, { key }, req) => {
-                        if (key !== "3kH78daS") {
+                        if (key !== createDummyOfferKey) {
                             return  false;
                         } else if(!req.user) {
                             return false;
@@ -360,7 +361,7 @@ class GraphqlApi {
                         } else {
                             try {
                                 let offers = method ? (await db.getUserOffers(req.user.steamid)) : (await db.getBoughtOffers(req.user.steamid));
-                                let botItems = await steamBot.getBotItems();
+                                let botItems = await steamBot.getBotItems(false);
                                 let resOffer = [];
                                 for(let offer of offers) {
                                     resOffer.push({

@@ -16,12 +16,13 @@
     --color-legendary: #D32CE6;
     --color-mythical: #8847FF;
     --color-rare: #4B69FF;
+    --color-deepgreen: #00b894;
 }
 
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 html, body{

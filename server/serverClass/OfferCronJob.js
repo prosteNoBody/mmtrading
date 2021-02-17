@@ -7,10 +7,11 @@ const TRADE_FILTER = {
 }
 
 class OfferCronJob {
-    constructor(steamBot, db, checkTimerInMinutes){
+    constructor(steamBot, db, checkTimerInMinutes, itemTradeBanInDays){
         this.steamBot = steamBot;
         this.db = db;
         this.checkTimerInMinutes = checkTimerInMinutes * 60 * 1000;
+        this.itemTradeBanInDays = itemTradeBanInDays;
 
         this.steamBot.client.on('webSession',() => {
             this.initEventsWhenReady();
@@ -57,7 +58,7 @@ class OfferCronJob {
         let offers = await this.db.getAllHoldingOffers();
         for(let offer of offers) {
             let daysBetween = (new Date().getTime() - new Date(offer.date).getTime()) / (1000 * 60 * 60 * 24);
-            if(daysBetween > 7) {
+            if(daysBetween > this.itemTradeBanInDays) {
                 this.db.setOfferForWithdraw(offer.id).then();
             }
         }

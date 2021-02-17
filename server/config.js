@@ -1,0 +1,5 @@
+module.exports = {
+    "INITIAL_OFFER_CANCEL_TIME": 5,
+    "ITEMS_TRADE_BAN_EXPIRE": 7,
+    "CHECK_OFFERS_IN_MINUTES": 10,
+}

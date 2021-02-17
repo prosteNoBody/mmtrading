@@ -193,7 +193,10 @@ class Database{
 
     async setInitialOfferStatus(tradeId, status) {
         return new Promise((resolve, reject) => {
-            Offer.findOneAndUpdate({trade_id: tradeId}, {status: status}).then(() => {
+            Offer.findOneAndUpdate({trade_id: tradeId}, {
+                status: status,
+                date: (new Date()).toISOString(),
+            }).then(() => {
                 resolve();
             }).catch(e => console.log(e))
         })
@@ -238,13 +241,15 @@ class Database{
     async setOfferAsBought(offerId, buyerId) {
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.BUYER_PAY,
+            date: (new Date()).toISOString(),
             buyer_id: buyerId,
         }).catch(e => console.log(e));
     }
 
     async setOfferAsWithdraw(offerId) {
         Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.USER_WITHDRAW
+            status: OFFER_STATE.USER_WITHDRAW,
+            date: (new Date()).toISOString(),
         }).catch(e => console.log(e))
     }
 

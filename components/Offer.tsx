@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import styled from 'styled-components'
 
 import {OfferType, UserType} from "./Types";
+import OFFER_STATE from '../server/types/OfferState';
+import {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} from '../server/config';
 
 import ItemsManager from "./ItemsManager";
 import CopyLink from "./CopyLink";
@@ -43,6 +45,8 @@ const ToggleButton = styled.div`
   
   padding: 0.25rem;
   
+  font-size: 0.8rem;
+  
   border: solid 4px var(--color-${(props:ToggleButtonProps) => props.isToggled ? 'ancient' : 'rare'});
   color: var(--color-white);
   
@@ -54,12 +58,18 @@ const ToggleButton = styled.div`
     content: '';
     position: absolute;
     
-    width: 2rem;
+    width: 1rem;
     background: var(--color-white);
     
     top: 0;
     bottom: 0;
     ${(props:ToggleButtonProps) => props.isToggled ? 'left: 0;' : 'right: 0;'}
+  }
+  @media (max-width: 1150px) {
+    font-size: .7rem;
+    &:after{
+      width: 0.2rem;
+    }
   }
 `;
 const ToggleButtonWrapper = styled.div`
@@ -70,6 +80,8 @@ const ToggleButtonWrapper = styled.div`
   
   margin: 0 1rem;
   
+  font-size: 1.5rem;
+  
   color: var(--color-white);
 `;
 
@@ -77,24 +89,47 @@ const RelativeContainer = styled.div`
   position: relative;
 `;
 
-const ProfileInfoWrapper = styled.div`
-  position: relative;
-  grid-area: profile;
+const DescriptionTitle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   
-  margin: 1rem;
-  padding-bottom: 0.3rem;
+  margin-top: .5rem;
+  
+  letter-spacing: 1px;
+  font-size: 1.2rem;
+  font-weight: bold;
   
   color: var(--color-white);
+`;
+
+const PriceWrapper = styled.div`
+  color: var(--color-white);
+
+  position: relative;
   
-  font-size: 1.3rem;
-  font-weight: bold;
-  text-align: center;
+  align-self: center;
   
-  word-break: break-word;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   
+  margin: 0 1rem;
+  
+  font-size: 2.5rem;
+  
+  &::after{
+    content: '€';
+    position: absolute;
+    bottom: 0.25rem;
+    right: -1rem;
+    font-size: 1.2rem;
+    
+    color: gray;
+  }
+`;
+
+const BottomSeparator = styled.div`
   &:after{
     content: "";
     position: absolute;
@@ -105,6 +140,62 @@ const ProfileInfoWrapper = styled.div`
     background: grey;
   }
 `;
+
+type ColorStyleProps = {
+    color: string;
+}
+const StatusWrapper = styled(BottomSeparator)`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  margin: .7rem;
+  margin-top: 0;
+  padding-bottom: 0.3rem;
+
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+
+  color: var(--color-${(props: ColorStyleProps) => props.color});
+`;
+
+const DateWrapper = styled(BottomSeparator)`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  margin: .7rem;
+  margin-top: 0;
+  padding-bottom: 0.3rem;
+  
+  font-size: 1.3rem;
+  font-weight: bold;
+  
+  color: var(--color-${(props: ColorStyleProps) => props.color});
+`;
+
+const ProfileInfoWrapper = styled(BottomSeparator)`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  margin: .7rem;
+  margin-top: .1rem;
+  padding-bottom: 0.3rem;
+  
+  color: var(--color-white);
+  
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  
+  word-break: break-word;
+`;
+
 const ProfileImgWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -144,7 +235,7 @@ const OverMessage = styled.div`
   width: 100%;
   height: 20%;
  
-  background: var(--color-${(props:OverMessageType) => props.isCancel ? 'ancient' : 'arcana'});
+  background: var(--color-${(props:OverMessageType) => props.isCancel ? 'ancient' : 'deepgreen'});
   color: white;
   
   transform: translateY(-50%);
@@ -157,6 +248,31 @@ const CopyLinkWrapper = styled.div`
   grid-area: link;
 `;
 
+const OFFER_STATE_VALUES = {
+    [OFFER_STATE.USER_WITHDRAW] : {
+        text: 'Owner withdraw',
+        color: 'ancient',
+    },[OFFER_STATE.OFFER_CANCELED] : {
+        text: 'Offer canceled',
+        color: 'ancient',
+    },[OFFER_STATE.INITIAL_CREATE] : {
+        text: 'INITIAL CREATE',
+        color: 'immortal',
+    },[OFFER_STATE.BOT_HOLDING] : {
+        text: 'TRADE BAN HOLD',
+        color: 'immortal',
+    },[OFFER_STATE.BOT_READY] : {
+        text: 'Offer ready',
+        color: 'deepgreen',
+    },[OFFER_STATE.BUYER_PAY] : {
+        text: 'Buyer pays',
+        color: 'deepgreen',
+    },[OFFER_STATE.COMPLETED] : {
+        text: 'Offer completed',
+        color: 'deepgreen',
+    },
+}
+
 type Props = {
     offer: OfferType;
     user: UserType;
@@ -167,11 +283,69 @@ const Offer: React.FC<Props> = (props) => {
     const [itemsDetails, setItemsDetails] = useState(false);
 
     const generateOverMessage = () => {
-        if(status === -1 || status === -2) {
+        if(status === OFFER_STATE.OFFER_CANCELED || status === OFFER_STATE.USER_WITHDRAW) {
             return (<OverMessage isCancel={true}>CANCELED</OverMessage>);
-        } else if (status === 0 || status === 4) {
+        } else if (status === OFFER_STATE.INITIAL_CREATE || status === OFFER_STATE.COMPLETED) {
             return (<OverMessage isCancel={false}>{status === 0 ? 'BOT WAITING FOR ITEMS' : 'COMPLETED'}</OverMessage>)
         }
+    }
+
+    const generateStatus = () => {
+        const offerValue = OFFER_STATE_VALUES[status];
+        return (<StatusWrapper color={offerValue.color}>{offerValue.text.toUpperCase()}</StatusWrapper>)
+    }
+
+    const generateTimeTitle = () => {
+        let timeTitle = "DATE:";
+        switch (status) {
+            case OFFER_STATE.OFFER_CANCELED:
+            case OFFER_STATE.USER_WITHDRAW:
+                timeTitle = "CANCEL:";
+                break;
+            case OFFER_STATE.INITIAL_CREATE:
+                timeTitle = "EXPIRE:";
+                break;
+            case OFFER_STATE.BOT_HOLDING:
+                timeTitle = "TRADE BAN EXPIRE:";
+                break;
+            case OFFER_STATE.BOT_READY:
+                timeTitle = "OFFER READY SINCE:";
+                break;
+            case OFFER_STATE.BUYER_PAY:
+            case OFFER_STATE.COMPLETED:
+                timeTitle = "OFFER WAS COMPLETED:";
+                break;
+        }
+
+        return (<DescriptionTitle>{timeTitle}</DescriptionTitle>)
+    }
+
+    const generateTime = () => {
+        let time = '';
+        let color = '';
+        const d = new Date(date);
+        if(status === OFFER_STATE.INITIAL_CREATE) {
+            color = "ancient";
+            time = 'in ' + Math.ceil((d.getTime() + INITIAL_OFFER_CANCEL_TIME * 60 * 1000 - new Date().getTime()) / 1000 / 60).toString() + ' minute/s';
+        } else if(status === OFFER_STATE.BOT_HOLDING) {
+            color = "immortal";
+            time = 'in ' + Math.ceil((d.getTime() + ITEMS_TRADE_BAN_EXPIRE * 60 * 60 * 1000 - new Date().getTime()) / 1000 / 60 / 60).toString() + ' day/s';
+        } else {
+            color = "white";
+            const c = d => {return d < 10 ? '0' + d : d};
+            time = [c(d.getDate()), c(d.getMonth() + 1), c(d.getFullYear())].join('.');
+        }
+
+        return (<DateWrapper color={color}>{time}</DateWrapper>)
+    }
+
+    const generateItemsDetailButton = () => {
+        if(status === OFFER_STATE.OFFER_CANCELED || status === OFFER_STATE.USER_WITHDRAW || status === OFFER_STATE.USER_WITHDRAW)
+            return;
+        return (<ToggleButtonWrapper>
+            Item details:
+            <ToggleButton isToggled={itemsDetails} onClick={() => setItemsDetails(!itemsDetails)}>{itemsDetails ? 'OFF' : 'ON'}</ToggleButton>
+        </ToggleButtonWrapper>)
     }
 
     return (
@@ -185,9 +359,16 @@ const Offer: React.FC<Props> = (props) => {
                 </RelativeContainer>
                 <CopyLinkWrapper><CopyLink offerId={id}/></CopyLinkWrapper>
                 <DetailsWrapper>
+                    <DescriptionTitle>OWNER:</DescriptionTitle>
                     <ProfileInfoWrapper>{name} <ProfileImgWrapper><img src={avatar}/></ProfileImgWrapper></ProfileInfoWrapper>
+                    <DescriptionTitle>STATUS:</DescriptionTitle>
+                    {generateStatus()}
+                    {generateTimeTitle()}
+                    {generateTime()}
+                    <DescriptionTitle>PRICE:</DescriptionTitle>
+                    <PriceWrapper>{price}</PriceWrapper>
                 </DetailsWrapper>
-                <ToggleButtonWrapper>Item details: <ToggleButton isToggled={itemsDetails} onClick={() => setItemsDetails(!itemsDetails)}>{itemsDetails ? 'OFF' : 'ON'}</ToggleButton></ToggleButtonWrapper>
+                {generateItemsDetailButton()}
             </SemiContainer>
         </Container>
     )

@@ -69,9 +69,9 @@ class SteamBot {
             cb(error,inventory);
         });
     };
-    getBotItems = async () => {
+    getBotItems = async (tradeable = true) => {
         return new Promise((resolve, reject) => {
-            this.manager.getInventoryContents(570,2,true, (error, inventory) => {
+            this.manager.getInventoryContents(570,2,tradeable, (error, inventory) => {
                 if(error || typeof inventory == 'undefined'){
                     return reject("File could not be loaded, your profile may be private!");
                 }

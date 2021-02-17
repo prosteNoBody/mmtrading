@@ -22,7 +22,7 @@ const Container = styled.div`
     z-index: auto;
     filter: drop-shadow(0 0 .2rem var(--color-black));
     transform-origin: top;
-    transform: translateX(${(props:OpenType) => (props.open ? '0' : '20rem')});
+    transform: translateY(${(props:OpenType) => (props.open ? '0' : '-30rem')});
     opacity: ${(props:OpenType) => (props.open ? '1' : '0')};
     transition: transform 400ms ease-out, opacity 300ms ease-out;
 `;

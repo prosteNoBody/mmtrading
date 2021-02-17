@@ -9,7 +9,9 @@ const SteamBot = require('./serverClass/SteamBot');
 const Database = require('./serverClass/Database');
 const OfferCronJob = require('./serverClass/OfferCronJob');
 const GraphqlApi = require('./schemes/GraphqlApi');
-const config = require('./keys');
+const config = require('./config');
+const keys = require('./keys');
+
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -19,13 +21,13 @@ const handle = app.getRequestHandler();
 const indexPage = '/';
 const mainPage = '/dashboard';
 
-const bot = new SteamBot(config, 5);
-const db = new Database(config);
+const bot = new SteamBot(keys, config.INITIAL_OFFER_CANCEL_TIME);
+const db = new Database(keys);
 const graphqlApi = new GraphqlApi(bot,db);
-const offerCronJob = new OfferCronJob(bot, db, 0.5);
+const offerCronJob = new OfferCronJob(bot, db, config.CHECK_OFFERS_IN_MINUTES, config.ITEMS_TRADE_BAN_EXPIRE);
 const auth = new Auth(indexPage, mainPage);
 const store = new MongoDBStore({
-    uri: config.mongoUrl,
+    uri: keys.mongoUrl,
     collection: 'authSession'
 })
 
