@@ -84,6 +84,7 @@ class GraphqlApi {
             description: 'Return offer object',
             fields: () => ({
                 id: {type: GraphQLString},
+                is_mine: {type: GraphQLBoolean},
                 user_id: {type: GraphQLString},
                 buyer_id: {type: GraphQLString},
                 trade_id: {type: GraphQLString},
@@ -364,6 +365,7 @@ class GraphqlApi {
                                 for(let offer of offers) {
                                     resOffer.push({
                                         id: offer.id,
+                                        is_mine: offer.user_id === req.user.steamid,
                                         user_id: offer.user_id,
                                         buyer_id: offer.buyer_id,
                                         trade_id: offer.trade_id,

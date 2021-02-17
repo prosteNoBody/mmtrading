@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 
-import {ItemType, OfferType} from "./Types";
+import {ItemType, OfferType, UserType} from "./Types";
 
 import LoadingIcon from "./LoadingIcon";
 import Offer from "./Offer";
@@ -73,15 +73,15 @@ type Props = {
     error?: string;
     offers: OfferType[];
     offersPerPage?: number;
+    user: UserType;
 }
-
 const OffersManager: React.FC<Props> = (props) => {
-    const {offers, offersPerPage} = props;
+    const {offers, offersPerPage, user} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
     const createOffer = (offer:OfferType) => {
-        return <Offer key={offer.id} offer={offer} detail={false}/>
+        return <Offer key={offer.id} offer={offer} user={user}/>
     };
 
     const generateOffers = () => {

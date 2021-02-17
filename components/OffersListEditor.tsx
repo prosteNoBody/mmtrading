@@ -8,7 +8,7 @@ import {gql} from 'apollo-boost';
 import TwoButtonSwitch from "./TwoButtonSwitch";
 import OffersManager from "./OffersManager";
 import LoadingIcon from "./LoadingIcon";
-import {OfferType} from "./Types";
+import {OfferType, UserType} from "./Types";
 
 const Container = styled.div`
   grid-area: main-content;
@@ -22,7 +22,7 @@ const Container = styled.div`
   background: radial-gradient(circle, rgba(247,247,247,1) 0%, rgba(230,230,230,1) 100%);
 `;
 
-const GETALLOFFERS_REQUEST = gql`
+const GET_ALLOFFERS_REQUEST = gql`
 query ($method: Boolean!){
   getAllOffers(method: $method){
     error
@@ -49,23 +49,27 @@ query ($method: Boolean!){
     }
   }
 }`;
-const OffersListEditor:React.FC = () => {
+type Props = {
+    user: UserType;
+}
+const OffersListEditor:React.FC<Props> = (props) => {
+    const {user} = props;
     const [offersTypeSwitch, setOffersTypeSwitch] = useState(true);
     const [offers, setOffers] = useState<OfferType[]>([]);
     const [error, setError] = useState("");
     const { addToast } = useToasts();
 
-    const [getQuery, {loading}] = useLazyQuery(GETALLOFFERS_REQUEST,{
+    const [getQuery, {loading}] = useLazyQuery(GET_ALLOFFERS_REQUEST,{
         fetchPolicy: 'network-only',
         onCompleted: (data => {
             if(data) {
                 if(data.getAllOffers?.error) {
                     let errorMsg = "There was an error during data request"
                     switch (data.getAllOffers.error) {
-                        case "1":
+                        case 1:
                             errorMsg = "You are required to be logged in! Please re/login first"
                             break;
-                        case "2":
+                        case 2:
                             errorMsg = "There was problem in fetching offers"
                             break;
                     }
@@ -103,7 +107,7 @@ const OffersListEditor:React.FC = () => {
     return(
         <Container>
             <TwoButtonSwitch refreshAction={fetchData} changeSwitch={changeSwitch} isOn={offersTypeSwitch} firstSwitchText="My Offers" secondSwitchText="Bought Offers"/>
-            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10}/>
+            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10} user={user}/>
         </Container>
     );
 };

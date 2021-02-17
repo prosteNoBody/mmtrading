@@ -22,7 +22,7 @@ const dashboard = (props:Props) => {
                 <title>MMTrading | Offers</title>
             </Head>
             <Navbar user={user}/>
-            <OffersListEditor/>
+            <OffersListEditor user={user}/>
         </MainContainer>
     );
 };

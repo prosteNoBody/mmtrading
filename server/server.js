@@ -19,7 +19,7 @@ const handle = app.getRequestHandler();
 const indexPage = '/';
 const mainPage = '/dashboard';
 
-const bot = new SteamBot(config, 2);
+const bot = new SteamBot(config, 5);
 const db = new Database(config);
 const graphqlApi = new GraphqlApi(bot,db);
 const offerCronJob = new OfferCronJob(bot, db, 0.5);
