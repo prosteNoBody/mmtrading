@@ -63,7 +63,7 @@ const ImgPlaceholder = styled.div`
 
   width: 120px;
   
-  background:grey;
+  background: var(--color-gray);
   color: whitesmoke;
   
   font-size: 1.5rem;

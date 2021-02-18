@@ -1,12 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components'
+import { useToasts } from 'react-toast-notifications';
 
 import {OfferType, UserType} from "./Types";
 import OFFER_STATE from '../server/types/OfferState';
 import {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} from '../server/config';
 
+import {useLazyQuery, useQuery} from "@apollo/react-hooks";
+import {gql} from 'apollo-boost';
+
 import ItemsManager from "./ItemsManager";
 import CopyLink from "./CopyLink";
+import LazyLoadingButton from "./LazyLoadingButton";
+
+import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
   margin-bottom: 3rem;
@@ -31,6 +38,7 @@ const SemiContainer = styled.div`
 
 type ToggleButtonProps = {
     isToggled: boolean;
+    isDisable: boolean;
 }
 const ToggleButton = styled.div`
   position: relative;
@@ -46,20 +54,21 @@ const ToggleButton = styled.div`
   padding: 0.25rem;
   
   font-size: 0.8rem;
+  font-weight: bold;
   
-  border: solid 4px var(--color-${(props:ToggleButtonProps) => props.isToggled ? 'ancient' : 'rare'});
+  border: solid 4px var(--color-${(props:ToggleButtonProps) => props.isDisable ? 'gray' : props.isToggled ? 'ancient' : 'rare'});
   color: var(--color-white);
   
-  background: var(--color-${(props:ToggleButtonProps) => props.isToggled ? 'ancient' : 'rare'});
+  background: var(--color-${(props:ToggleButtonProps) => props.isDisable ? 'gray' : props.isToggled ? 'ancient' : 'rare'});
   
-  cursor: pointer;
+  cursor: ${(props:ToggleButtonProps) => props.isDisable ? 'default' : 'pointer'};
   user-select: none;
   &:after{
     content: '';
     position: absolute;
     
     width: 1rem;
-    background: var(--color-white);
+    background: white;
     
     top: 0;
     bottom: 0;
@@ -76,7 +85,7 @@ const ToggleButtonWrapper = styled.div`
   grid-area: toggleButton;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   
   margin: 0 1rem;
   
@@ -95,6 +104,7 @@ const DescriptionTitle = styled.div`
   align-items: center;
   
   margin-top: .5rem;
+  margin-bottom: 0.2rem;
   
   letter-spacing: 1px;
   font-size: 1.2rem;
@@ -125,7 +135,7 @@ const PriceWrapper = styled.div`
     right: -1rem;
     font-size: 1.2rem;
     
-    color: gray;
+    color: var(--color-gray);
   }
 `;
 
@@ -137,7 +147,7 @@ const BottomSeparator = styled.div`
     height: 2px;
     width: 60%;
     
-    background: grey;
+    background: var(--color-gray);
   }
 `;
 
@@ -273,14 +283,98 @@ const OFFER_STATE_VALUES = {
     },
 }
 
+const OFFER_REQUESTS = {
+    USER_WITHDRAW: 'withdrawOffer',
+    BUYER_WITHDRAW: 'withdrawBoughtItems',
+    BUY_OFFER: 'buyOffer',
+}
+const generateGQLRequest = (method, offerId) => {
+    return gql`
+        {
+            ${method}(offerid: "${offerId}") {
+                error
+                success
+            }
+        }
+    `;
+}
+
 type Props = {
     offer: OfferType;
     user: UserType;
+    reloadOffer: () => void;
 }
 const Offer: React.FC<Props> = (props) => {
-    const {offer: {items, id, is_mine, user_id, buyer_id, trade_id, price, date, status}, user: {name, avatar}} = props;
-
+    const {offer: {items, id, is_mine, user_id, buyer_id, trade_id, price, date, status}, user: {name, avatar}, reloadOffer} = props;
     const [itemsDetails, setItemsDetails] = useState(false);
+    const {addToast} = useToasts();
+
+    let actionText = "NO ACTION";
+    let method:string;
+    let disableAction = true;
+    if(status === OFFER_STATE.BOT_READY || (status === OFFER_STATE.BUYER_PAY && !is_mine)) {
+        if(status === OFFER_STATE.BOT_READY && is_mine) {
+            actionText = "CANCEL";
+            method = OFFER_REQUESTS.USER_WITHDRAW;
+        } else if(status === OFFER_STATE.BOT_READY && !is_mine) {
+            actionText = "BUY";
+            method = OFFER_REQUESTS.BUY_OFFER;
+        } else if(status === OFFER_STATE.BUYER_PAY && !is_mine) {
+            actionText = "WITHDRAW";
+            method = OFFER_REQUESTS.BUYER_WITHDRAW;
+        }
+        disableAction = false;
+    }
+
+    const [getQuery, {loading}] = useLazyQuery(generateGQLRequest(method, id),{
+        fetchPolicy: 'network-only',
+        onCompleted: (data => {
+            if(data) {
+                const {withdrawOffer, withdrawBoughtItems, buyOffer} = data;
+                let activeData;
+                switch (method) {
+                    case OFFER_REQUESTS.USER_WITHDRAW:
+                        activeData = withdrawOffer;
+                        break;
+                    case OFFER_REQUESTS.BUYER_WITHDRAW:
+                        activeData = withdrawBoughtItems;
+                        break;
+                    case OFFER_REQUESTS.BUY_OFFER:
+                        activeData = buyOffer;
+                        break;
+                }
+                const {error, success} = activeData;
+                if(error) {
+                    addToast(getErrorMessage(error, "There was an error during data request") , {
+                        appearance: 'warning',
+                        autoDismiss: true,
+                    })
+                } else if(success) {
+                    let successMsg = "Action was successfully finished"
+                    switch (method) {
+                        case OFFER_REQUESTS.USER_WITHDRAW:
+                        case OFFER_REQUESTS.BUYER_WITHDRAW:
+                            successMsg = "Withdraw offer was created";
+                            break;
+                        case OFFER_REQUESTS.BUY_OFFER:
+                            successMsg = "Offer was bought successfully";
+                            reloadOffer();
+                            break;
+                    }
+                    addToast(successMsg , {
+                        appearance: 'success',
+                        autoDismiss: true,
+                    })
+                }
+            }
+        }),
+        onError: () => {
+            addToast("There was an error during data request" , {
+                appearance: 'error',
+                autoDismiss: true,
+            })
+        }
+    });
 
     const generateOverMessage = () => {
         if(status === OFFER_STATE.OFFER_CANCELED || status === OFFER_STATE.USER_WITHDRAW) {
@@ -326,10 +420,10 @@ const Offer: React.FC<Props> = (props) => {
         const d = new Date(date);
         if(status === OFFER_STATE.INITIAL_CREATE) {
             color = "ancient";
-            time = 'in ' + Math.ceil((d.getTime() + INITIAL_OFFER_CANCEL_TIME * 60 * 1000 - new Date().getTime()) / 1000 / 60).toString() + ' minute/s';
+            time = 'in ' + Math.ceil((d.getTime() + INITIAL_OFFER_CANCEL_TIME * 1000 * 60 - new Date().getTime()) / 1000 / 60).toString() + ' minute/s';
         } else if(status === OFFER_STATE.BOT_HOLDING) {
             color = "immortal";
-            time = 'in ' + Math.ceil((d.getTime() + ITEMS_TRADE_BAN_EXPIRE * 60 * 60 * 1000 - new Date().getTime()) / 1000 / 60 / 60).toString() + ' day/s';
+            time = 'in ' + Math.ceil((d.getTime() + ITEMS_TRADE_BAN_EXPIRE * 1000 * 60 * 60 * 24 - new Date().getTime()) / 1000 / 60 / 60 / 24).toString() + ' day/s';
         } else {
             color = "white";
             const c = d => {return d < 10 ? '0' + d : d};
@@ -340,12 +434,21 @@ const Offer: React.FC<Props> = (props) => {
     }
 
     const generateItemsDetailButton = () => {
-        if(status === OFFER_STATE.OFFER_CANCELED || status === OFFER_STATE.USER_WITHDRAW || status === OFFER_STATE.USER_WITHDRAW)
-            return;
         return (<ToggleButtonWrapper>
             Item details:
-            <ToggleButton isToggled={itemsDetails} onClick={() => setItemsDetails(!itemsDetails)}>{itemsDetails ? 'OFF' : 'ON'}</ToggleButton>
+            <ToggleButton
+                isDisable={items.length === 0}
+                isToggled={itemsDetails}
+                onClick={() => {
+                    if (items.length !== 0) setItemsDetails(!itemsDetails)
+                }}>
+                    {items.length === 0 ? 'DISABLED' : itemsDetails ? 'OFF' : 'ON'}
+            </ToggleButton>
         </ToggleButtonWrapper>)
+    }
+
+    const action = () => {
+        getQuery();
     }
 
     return (
@@ -367,6 +470,7 @@ const Offer: React.FC<Props> = (props) => {
                     {generateTime()}
                     <DescriptionTitle>PRICE:</DescriptionTitle>
                     <PriceWrapper>{price}</PriceWrapper>
+                    <LazyLoadingButton isLoading={loading} isDisable={disableAction} displayedText={actionText} action={action} small={true} bottomAlign={true}/>
                 </DetailsWrapper>
                 {generateItemsDetailButton()}
             </SemiContainer>

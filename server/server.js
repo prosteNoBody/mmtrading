@@ -8,7 +8,7 @@ const Auth = require('./serverClass/Auth');
 const SteamBot = require('./serverClass/SteamBot');
 const Database = require('./serverClass/Database');
 const OfferCronJob = require('./serverClass/OfferCronJob');
-const GraphqlApi = require('./schemes/GraphqlApi');
+const GraphqlApi = require('./serverClass/GraphqlApi');
 const config = require('./config');
 const keys = require('./keys');
 

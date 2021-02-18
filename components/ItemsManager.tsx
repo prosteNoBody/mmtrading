@@ -22,7 +22,7 @@ const Container = styled.div`
   background: rgb(28,28,28);
   background: radial-gradient(circle, rgba(45,45,45,1) 0%, rgba(28,28,28,1) 100%);
   
-  filter: drop-shadow(0 0 .75rem grey);
+  filter: drop-shadow(0 0 .75rem var(--color-gray));
   overflow-y: scroll;
   overflow-x: hidden;
   
@@ -56,7 +56,7 @@ const InsideText = styled.div`
   justify-content: center;
   align-items: center;
 
-  color: grey;
+  color: var(--color-gray);
   
   text-align: center;
   font-size: 200%;

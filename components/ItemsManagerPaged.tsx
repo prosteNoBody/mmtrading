@@ -5,7 +5,7 @@ import {ItemType} from "./Types";
 
 import ItemsManager from './ItemsManager';
 import LoadingIcon from "./LoadingIcon";
-import generateBtns from "./generateBtns";
+import {generateBtns} from "./helpFunctions";
 
 type ContainerProps = {
     gridSelector:string;

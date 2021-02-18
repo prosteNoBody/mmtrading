@@ -294,7 +294,7 @@ class Database{
                 id: offerId,
                 buyer_id: steamId,
             }).then(offer => {
-                if(!offer || offer.status !== OFFER_STATE.BUYER_PAY) {
+                if(offer && offer.status === OFFER_STATE.BUYER_PAY) {
                     resolve(false);
                 } else {
                     resolve(true);

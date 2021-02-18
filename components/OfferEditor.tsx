@@ -12,6 +12,7 @@ import ItemsManagerPaged from "./ItemsManagerPaged";
 import ItemsManager from './ItemsManager';
 import ControlsManager from './ControlsManager';
 import OfferSubmitter from './OfferSubmitter';
+import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
   grid-area: main-content;
@@ -104,9 +105,9 @@ const OfferEditor: React.FC<Props> = (props) => {
         fetchPolicy: 'network-only',
         onCompleted: data => {
             if(data.getTradeUrl?.error) {
-                addToast("You are required to be logged in! Please re/login first", {
-                    autoDismiss: true,
+                addToast(getErrorMessage(data.getTradeUrl.error, "There was an error during data request") , {
                     appearance: 'warning',
+                    autoDismiss: true,
                 })
             } else if(typeof data.getTradeUrl?.tradeurl === 'string' && data.getTradeUrl.tradeurl === "") {
                 addToast("You need to set trade url in settings before trading items", {

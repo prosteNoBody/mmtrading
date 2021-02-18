@@ -24,7 +24,7 @@ const Container = styled.div`
   
   background: rgb(28,28,28);
   background: radial-gradient(circle, rgba(45,45,45,1) 0%, rgba(28,28,28,1) 100%);
-  filter: drop-shadow(0 0 .75rem grey);
+  filter: drop-shadow(0 0 .75rem var(--color-gray));
   
   overflow-y: scroll;
   overflow-x: hidden;
@@ -55,7 +55,7 @@ const InsideText = styled.div`
 
   flex: 1;
 
-  color: grey;
+  color: var(--color-gray);
   
   text-align: center;
   font-size: 200%;
@@ -81,13 +81,13 @@ const OffersManager: React.FC<Props> = (props) => {
     const error = props.error || false;
 
     const createOffer = (offer:OfferType) => {
-        return <Offer key={offer.id} offer={offer} user={user}/>
+        return <Offer key={offer.id} offer={offer} user={user} reloadOffer={() => {/* TODO */}}/>
     };
 
     const generateOffers = () => {
         if(isLoading) return <InsideText>Loading... <LoadingIcon/></InsideText>;
         else if(error) return <InsideText>{error}</InsideText>;
-        else if(offers.length === 0) return <InsideText>No offers</InsideText>
+        else if(offers.length === 0) return <InsideText>No offers...</InsideText>
         return offers.map((offer) => createOffer(offer))
     };
 

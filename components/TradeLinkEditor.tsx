@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import LazyLoadingButton from "./LazyLoadingButton";
 import {useLazyQuery, useQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
+import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
   width: 80%;
@@ -15,14 +16,10 @@ const Container = styled.div`
   
   filter: drop-shadow(0 0 0.75rem var(--color-black));
   
-  opacity: ${(props: ContainerProps) => props.isLoading ? 0.7 : 1};
   transition: opacity 300ms;
   background: var(--color-arcana);
 `;
 
-type ContainerProps = {
-    isLoading: boolean;
-}
 const InputUrl = styled.input`
   font-family: inherit; /* 1 */
   font-size: 110%; /* 1 */
@@ -81,13 +78,13 @@ type TradeLink = {
 }
 
 const TRADELINK_REQUEST = gql`
-        query ($tradeUrl: String!){
-            getTradeUrl(tradeUrl:$tradeUrl){
-                error
-                tradeurl
-                changed
-            }
-        }`;
+query ($tradeUrl: String!){
+    getTradeUrl(tradeUrl:$tradeUrl){
+        error
+        tradeurl
+        changed
+    }
+}`;
 const TradeLinkEditor: React.FC<Props> = (props) => {
     const [tradeUrl, setTradeUrl] = useState("");
     const { addToast } = useToasts();
@@ -98,22 +95,7 @@ const TradeLinkEditor: React.FC<Props> = (props) => {
         onCompleted: (data => {
             if(data) {
                 if(data.getTradeUrl?.error) {
-                    let errorMsg = "There was an error during data request"
-                    switch (data.getTradeUrl.error) {
-                        case "1":
-                            errorMsg = "You are required to be logged in! Please re/login first"
-                            break;
-                        case "2":
-                            errorMsg = "This is already your url"
-                            break;
-                        case "3":
-                            errorMsg = "Url is invalid"
-                            break;
-                        case "4":
-                            errorMsg = "Token you provide is not valid"
-                            break;
-                    }
-                    addToast(errorMsg , {
+                    addToast(getErrorMessage(data.getTradeUrl.error, "There was an error during data request") , {
                         appearance: 'warning',
                         autoDismiss: true,
                     })
@@ -161,7 +143,7 @@ const TradeLinkEditor: React.FC<Props> = (props) => {
     }
 
     return(
-        <Container isLoading={loading}>
+        <Container>
             <TradeLinkTitle>Trade link</TradeLinkTitle>
             <InputUrl ref={inputEl} placeholder="Trade Link" value={tradeUrl} onChange={e => setTradeUrl(e.target.value)} onFocus={e => e.target.select()} onKeyDown={handleKeyDown} disabled={loading}/>
             <LazyLoadingButton isLoading={loading} displayedText={"Update"} action={() => refetchData()}/>

@@ -47,7 +47,7 @@ const RefreshButton = styled.div`
   justify-content: center;
   align-items: center;
   
-  padding: 2rem;
+  padding: 1rem 2rem;
   
   color: var(--color-white);
   font-size: 1.5rem;

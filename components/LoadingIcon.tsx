@@ -6,7 +6,7 @@ const LoadingIcon = styled.div`
   margin: 1rem;
   border-radius: 50%;
   
-  border: 3px solid grey;
+  border: 3px solid var(--color-gray);
   border-left: 3px solid lightgoldenrodyellow;
   
   animation: rotating 1s infinite;

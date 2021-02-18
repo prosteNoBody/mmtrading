@@ -71,7 +71,7 @@ class GraphqlApi {
         })
 
         this.OfferResponse = new GraphQLObjectType({
-            name: 'CreateOfferResponse',
+            name: 'OfferResponse',
             description: 'Return offer response',
             fields: () => ({
                 error: {type: GraphQLInt},
@@ -169,18 +169,18 @@ class GraphqlApi {
                         let tradeLink = await db.getUserTradeLinkNew(req.user.steamid);
                         if(tradeUrl){
                             if(tradeLink === tradeUrl){
-                                return { error: 2 }
+                                return { error: 16 }
                             } else {
                                 let token = extractTokenFromUrl(tradeUrl);
                                 if(!token) {
-                                    return { error: 3 };
+                                    return { error: 17 };
                                 }
                                 else if(await steamBot.isTokenValid(req.user.steamid, token)){
                                     const partnerid = steamBot.getPartnerId(req.user.steamid);
                                     const newTradeUrl = await db.updateAndGetUserTradeLinkNew(req.user.steamid, token, partnerid);
                                     return {tradeurl: newTradeUrl, changed: true};
                                 } else {
-                                    return { error: 4 }
+                                    return { error: 18 }
                                 }
                             }
                         } else {
@@ -197,29 +197,29 @@ class GraphqlApi {
                     },
                     resolve: async (parent, { items, price }, req) => {
                         if (!req.user) {
-                            return {error: 4};
-                        } else if (!price || !Number(price) || Number(price) < 0) {
-                            return {error: 5};
-                        } else if (items.length === 0) {
                             return {error: 1};
+                        } else if (!price || !Number(price) || Number(price) < 0) {
+                            return {error: 12};
+                        } else if (items.length === 0) {
+                            return {error: 9};
                         } else {
                             price = Math.round(Number(price) * 100)/100;
                             if(!await steamBot.validateOfferItems(req.user.steamid, items)) {
-                                return {error:3}
+                                return {error: 11}
                             } else {
                                 let tradeLink = await db.getUserTradeLinkNew(req.user.steamid);
                                 if(!(tradeLink && await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(tradeLink)))) {
                                     return {error: 2};
                                 } else {
                                     if(await db.userAlreadyHaveWaitingOffer(req.user.steamid)) {
-                                        return {error: 7};
+                                        return {error: 14};
                                     } else {
                                         try {
                                             let offerid = await steamBot.createNewOffer(tradeLink, items);
                                             let link = await db.createNewOffer(req.user.steamid, offerid, items, price);
                                             return { success: true, link: link };
                                         } catch {
-                                            return {error: 6};
+                                            return {error: 13};
                                         }
                                     }
                                 }
@@ -235,24 +235,25 @@ class GraphqlApi {
                     },
                     resolve: async (parent, { offerid }, req) => {
                         if (!req.user) {
-                            return {error: 4};
+                            return {error: 1};
                         } else {
-                            const userTradeUrl = await db.getUserTradeLinkNew(req.user.steamid);
-                            if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
-                                return {error: 2};
+                            const offer = await db.getOffer(offerid);
+                            if(!offer) {
+                                return {error: 7};
                             } else {
-                                if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BOT_READY)){
-                                    return {error: 5};
+                                const userTradeUrl = await db.getUserTradeLinkNew(req.user.steamid);
+                                if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
+                                    return {error: 2};
                                 } else {
-                                    if(!await db.isWithdrawReady(req.user.steamid ,offerid)) {
-                                        return {error: 0};
+                                    if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BOT_READY)){
+                                        return {error: 5};
                                     } else {
-                                        if(await db.isWithdrawActive(offerid)) {
-                                            return {error: 1};
+                                        if(!await db.isWithdrawReady(req.user.steamid ,offerid)) {
+                                            return {error: 3};
                                         } else {
                                             const offer = await db.getOffer(offerid);
                                             if(!await steamBot.validateBotOfferItems(offer.items)) {
-                                                return {error: 3};
+                                                return {error: 4};
                                             } else {
                                                 try {
                                                     let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
@@ -277,29 +278,33 @@ class GraphqlApi {
                     },
                     resolve: async (parent, { offerid }, req) => {
                         if (!req.user) {
-                            return {error: 4};
+                            return {error: 1};
                         } else {
                             const offer = await db.getOffer(offerid);
                             if(!offer) {
-                                return {error: 1};
+                                return {error: 7};
                             } else {
                                 if(offer.user_id === req.user.steamid) {
-                                    return {error: 2};
+                                    return {error: 8};
                                 } else {
-                                    if(offer.status !== OFFER_STATE.BOT_READY || offer.trade_id !== "") {
+                                    if(offer.status !== OFFER_STATE.BOT_READY) {
                                         return {error: 3};
                                     } else {
-                                        const buyerCredit = await db.getUserCredit(req.user.steamid);
-                                        if(buyerCredit < offer.price) {
-                                            return {error: 5};
+                                        if(offer.trade_id !== "") {
+                                           return {error: 19}
                                         } else {
-                                            const sellerCredit = await db.getUserCredit(offer.user_id);
-                                            await Promise.all([
-                                                db.updateUserCredit(req.user.steamid, buyerCredit - offer.price),
-                                                db.updateUserCredit(offer.user_id, sellerCredit + offer.price),
-                                                db.setOfferAsBought(offer.id, req.user.steamid)
-                                            ]);
-                                            return {success: true};
+                                            const buyerCredit = await db.getUserCredit(req.user.steamid);
+                                            if(buyerCredit < offer.price) {
+                                                return {error: 20};
+                                            } else {
+                                                const sellerCredit = await db.getUserCredit(offer.user_id);
+                                                await Promise.all([
+                                                    db.updateUserCredit(req.user.steamid, buyerCredit - offer.price),
+                                                    db.updateUserCredit(offer.user_id, sellerCredit + offer.price),
+                                                    db.setOfferAsBought(offer.id, req.user.steamid)
+                                                ]);
+                                                return {success: true};
+                                            }
                                         }
                                     }
                                 }
@@ -315,7 +320,7 @@ class GraphqlApi {
                     },
                     resolve: async (parent, { offerid }, req) => {
                         if (!req.user) {
-                            return {error: 4};
+                            return {error: 1};
                         } else {
                             const userTradeUrl = await db.getUserTradeLinkNew(req.user.steamid);
                             if(!await steamBot.isTokenValid(req.user.steamid, extractTokenFromUrl(userTradeUrl))) {
@@ -325,14 +330,14 @@ class GraphqlApi {
                                     return {error: 5};
                                 } else {
                                     if(!await db.isWithdrawOfBoughtItemsReady(req.user.steamid ,offerid)) {
-                                        return {error: 0};
+                                        return {error: 3};
                                     } else {
                                         if(await db.isWithdrawOfBoughtItemsActive(offerid)) {
-                                            return {error: 1};
+                                            return {error: 5};
                                         } else {
                                             const offer = await db.getOffer(offerid);
                                             if(!await steamBot.validateBotOfferItems(offer.items)) {
-                                                return {error: 3};
+                                                return {error: 4};
                                             } else {
                                                 try {
                                                     let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
@@ -378,7 +383,7 @@ class GraphqlApi {
                                 }
                                 return {offers: resOffer};
                             } catch {
-                                return {error: 2};
+                                return {error: 15};
                             }
                         }
                     }

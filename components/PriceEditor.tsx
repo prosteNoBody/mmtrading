@@ -32,7 +32,7 @@ const CurrencySign = styled.div`
   bottom: 0;
   right: -1rem;
   
-  color: grey;
+  color: var(--color-gray);
   
   font-size: 2rem;
   

@@ -9,6 +9,7 @@ import TwoButtonSwitch from "./TwoButtonSwitch";
 import OffersManager from "./OffersManager";
 import LoadingIcon from "./LoadingIcon";
 import {OfferType, UserType} from "./Types";
+import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
   grid-area: main-content;
@@ -30,6 +31,7 @@ query ($method: Boolean!){
       id
       user_id
       buyer_id
+      is_mine
       trade_id
       price
       items{
@@ -64,15 +66,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
         onCompleted: (data => {
             if(data) {
                 if(data.getAllOffers?.error) {
-                    let errorMsg = "There was an error during data request"
-                    switch (data.getAllOffers.error) {
-                        case 1:
-                            errorMsg = "You are required to be logged in! Please re/login first"
-                            break;
-                        case 2:
-                            errorMsg = "There was problem in fetching offers"
-                            break;
-                    }
+                    let errorMsg = getErrorMessage(error, "There was an error during data request");
                     setError(errorMsg);
                     addToast(errorMsg , {
                         appearance: 'warning',
@@ -80,7 +74,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
                     })
                 } else if(data.getAllOffers.offers) {
                     setError("");
-                    setOffers(data.getAllOffers.offers);
+                    setOffers([...data.getAllOffers.offers].reverse());
                 }
             }
         }),

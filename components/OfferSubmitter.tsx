@@ -9,6 +9,7 @@ import PriceEditor from './PriceEditor';
 import LazyLoadingButton from "./LazyLoadingButton";
 import {useLazyQuery} from "@apollo/react-hooks";
 import {gql} from "apollo-boost";
+import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
   grid-area: preview;
@@ -60,7 +61,7 @@ const ProfileInfoWrapper = styled.div`
     height: 2px;
     width: 60%;
     
-    background: grey;
+    background: var(--color-gray);
   }
 `;
 const ProfileImgWrapper = styled.div`
@@ -88,7 +89,7 @@ const SubmitButton = styled.button`
   padding: .5rem;
   border-radius: 1rem;
   
-  background: grey;
+  background: var(--color-gray);
   color: var(--color-white);
   box-shadow:inset 0 0 10px #AAAAAA;
   
@@ -163,34 +164,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
             if(data.createOffer?.success) {
                 offerWasCreated(data.createOffer.link);
             } else {
-                let errorMsg = "There was an error while creating offer";
-                if(data.createOffer?.error){
-                    switch (data.createOffer.error){
-                        case 1:
-                            errorMsg = "You didn't choose any items"
-                            break;
-                        case 2:
-                            errorMsg = "You need to set valid trade url"
-                            break;
-                        case 3:
-                            refetchItems();
-                            errorMsg = "There was problem with your items/inventory"
-                            break;
-                        case 4:
-                            errorMsg = "You required to be log-in before sending offer";
-                            break;
-                        case 5:
-                            errorMsg = "You have to enter valid price";
-                            break;
-                        case 6:
-                            errorMsg = "There was problem in sending you an offer, check if you don't have VAC/Trade ban"
-                            break;
-                        case 7:
-                            errorMsg = "You can have only one waiting offer at the time"
-                            break
-                    }
-                }
-                addToast(errorMsg, {
+                addToast(getErrorMessage(data.createOffer.error, "There was an error while creating offer"), {
                     autoDismiss: true,
                     appearance: 'warning',
                 })
