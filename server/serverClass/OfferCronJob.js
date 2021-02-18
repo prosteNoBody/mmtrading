@@ -37,7 +37,7 @@ class OfferCronJob {
                 } else if(offer.status === OFFER_STATE.BUYER_PAY) {
                     await this.db.setOfferAsCompleted(offer.id);
                 }
-            } else if(trade.state !== TRADE_STATE.InEscrow) {
+            } else if(trade.state !== TRADE_STATE.InEscrow && trade.state !== TRADE_STATE.Active) {
                 if(offer.status === OFFER_STATE.INITIAL_CREATE) {
                     await this.db.setInitialOfferStatus(trade.id, OFFER_STATE.OFFER_CANCELED);
                 } else if (offer.status === OFFER_STATE.BOT_READY || offer.status === OFFER_STATE.BUYER_PAY) {

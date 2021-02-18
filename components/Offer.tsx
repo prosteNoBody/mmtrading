@@ -92,6 +92,18 @@ const ToggleButtonWrapper = styled.div`
   font-size: 1.5rem;
   
   color: var(--color-white);
+  
+  @media (max-width: 1250px) {
+    font-size: 1rem;
+  }
+`;
+
+const ToggleButtonWrapperWrapper = styled.div`
+  width: 100%;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const RelativeContainer = styled.div`
@@ -435,15 +447,17 @@ const Offer: React.FC<Props> = (props) => {
 
     const generateItemsDetailButton = () => {
         return (<ToggleButtonWrapper>
-            Item details:
-            <ToggleButton
-                isDisable={items.length === 0}
-                isToggled={itemsDetails}
-                onClick={() => {
-                    if (items.length !== 0) setItemsDetails(!itemsDetails)
-                }}>
+            <ToggleButtonWrapperWrapper>
+                Item details:
+                <ToggleButton
+                    isDisable={items.length === 0}
+                    isToggled={itemsDetails}
+                    onClick={() => {
+                        if (items.length !== 0) setItemsDetails(!itemsDetails)
+                    }}>
                     {items.length === 0 ? 'DISABLED' : itemsDetails ? 'OFF' : 'ON'}
-            </ToggleButton>
+                </ToggleButton>
+            </ToggleButtonWrapperWrapper>
         </ToggleButtonWrapper>)
     }
 

@@ -66,7 +66,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
         onCompleted: (data => {
             if(data) {
                 if(data.getAllOffers?.error) {
-                    let errorMsg = getErrorMessage(error, "There was an error during data request");
+                    let errorMsg = getErrorMessage(data.getAllOffers.error, "There was an error during data request");
                     setError(errorMsg);
                     addToast(errorMsg , {
                         appearance: 'warning',
