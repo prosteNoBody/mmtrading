@@ -16,14 +16,14 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-    
-  padding: 2rem;
+  
+  padding-top: 1rem;
   
   background: rgb(247,247,247);
   background: radial-gradient(circle, rgba(247,247,247,1) 0%, rgba(230,230,230,1) 100%);
 `;
 
-const GET_ALLOFFERS_REQUEST = gql`
+const GET_ALL_OFFERS_REQUEST = gql`
 query ($method: Boolean!){
   getAllOffers(method: $method){
     error
@@ -61,7 +61,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
     const [error, setError] = useState("");
     const { addToast } = useToasts();
 
-    const [getQuery, {loading}] = useLazyQuery(GET_ALLOFFERS_REQUEST,{
+    const [getQuery, {loading}] = useLazyQuery(GET_ALL_OFFERS_REQUEST,{
         fetchPolicy: 'network-only',
         onCompleted: (data => {
             if(data) {

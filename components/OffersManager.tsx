@@ -1,13 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 
-import {ItemType, OfferType, UserType} from "./Types";
+import {OfferType, UserType} from "./Types";
 
 import LoadingIcon from "./LoadingIcon";
 import Offer from "./Offer";
 
 type ContainerProps = {
     gridSelector?:string;
+    singleOffer?: boolean;
 }
 const Container = styled.div`
   grid-area: ${(props: ContainerProps) => props.gridSelector || ''};
@@ -15,6 +16,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  justify-content: ${(props: ContainerProps) => props.singleOffer ? 'center' : 'flex-start'};
   
   width: 100%;
   
@@ -74,9 +76,10 @@ type Props = {
     offers: OfferType[];
     offersPerPage?: number;
     user: UserType;
+    singleOffer?: boolean;
 }
 const OffersManager: React.FC<Props> = (props) => {
-    const {offers, offersPerPage, user} = props;
+    const {offers, offersPerPage, user, singleOffer} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
@@ -92,7 +95,7 @@ const OffersManager: React.FC<Props> = (props) => {
     };
 
     return (
-        <Container>
+        <Container singleOffer={singleOffer}>
             {generateOffers()}
         </Container>
     );

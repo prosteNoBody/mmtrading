@@ -261,7 +261,7 @@ class GraphqlApi {
                             if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BOT_READY)){
                                 return {error: 5};
                             }
-                            if(offer.status !== OFFER_STATE.BOT_READY && offer.user_id !== req.user.steamid) {
+                            if(offer.status !== OFFER_STATE.BOT_READY || offer.user_id !== req.user.steamid) {
                                 return {error: 3};
                             }
                             if(!await steamBot.validateBotOfferItems(offer.items)) {
@@ -341,7 +341,7 @@ class GraphqlApi {
                             if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BUYER_PAY)) {
                                 return {error: 5};
                             }
-                            if(offer.status !== OFFER_STATE.BUYER_PAY && offer.buyer_id !== req.user.steamid) {
+                            if(offer.status !== OFFER_STATE.BUYER_PAY || offer.buyer_id !== req.user.steamid) {
                                 return {error: 3};
                             }
                             if(!await steamBot.validateBotOfferItems(offer.items)) {
@@ -405,7 +405,7 @@ class GraphqlApi {
                         try {
                             let offer = await db.getOffer(offerId);
                             let botItems = await steamBot.getBotItems(false);
-                            return {offers: {
+                            return {offer: {
                                     id: offer.id,
                                     is_mine: offer.user_id === req.user.steamid,
                                     user_id: offer.user_id,

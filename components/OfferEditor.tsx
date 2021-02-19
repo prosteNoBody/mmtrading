@@ -159,7 +159,6 @@ const OfferEditor: React.FC<Props> = (props) => {
             autoDismiss: true,
             appearance: 'success',
         });
-        return;
         setOfferItems([]);
         setInventoryItems([]);
         router.push('/offer/' + link).then();

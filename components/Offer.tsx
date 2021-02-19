@@ -118,6 +118,7 @@ const DescriptionTitle = styled.div`
   margin-top: .5rem;
   margin-bottom: 0.2rem;
   
+  text-align: center;
   letter-spacing: 1px;
   font-size: 1.2rem;
   font-weight: bold;

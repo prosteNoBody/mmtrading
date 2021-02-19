@@ -12,10 +12,8 @@ import OffersListEditor from "../components/OffersListEditor";
 type Props = {
     user?: UserType;
 }
-const dashboard = (props:Props) => {
+const offers = (props:Props) => {
     const {user} = props;
-    const avatar = user ? user.avatar : "";
-    const persona = user ? user.name : "";
     return (
         <MainContainer>
             <Head>
@@ -47,4 +45,4 @@ export const getServerSideProps: GetServerSideProps = async ({req}:{req:ReqUser}
         props: {}
     };
 };
-export default dashboard;
+export default offers;
