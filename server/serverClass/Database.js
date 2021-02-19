@@ -259,21 +259,6 @@ class Database{
         }).catch(e => console.log(e));
     }
 
-    async isWithdrawReady(steamId ,offerId) {
-        return new Promise((resolve, reject) => {
-            Offer.findOne({
-                id: offerId,
-                user_id: steamId,
-            }).then(offer => {
-                if(!offer || offer.status !== OFFER_STATE.BOT_READY) {
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            }).catch(e => console.log(e));
-        });
-    }
-
     async isWithdrawActive(offerId) {
         return new Promise((resolve, reject) => {
             Offer.findOne({
@@ -288,20 +273,6 @@ class Database{
         });
     }
 
-    async isWithdrawOfBoughtItemsReady(steamId ,offerId) {
-        return new Promise((resolve, reject) => {
-            Offer.findOne({
-                id: offerId,
-                buyer_id: steamId,
-            }).then(offer => {
-                if(offer && offer.status === OFFER_STATE.BUYER_PAY) {
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            }).catch(e => console.log(e));
-        });
-    }
 
     async isWithdrawOfBoughtItemsActive(offerId) {
         return new Promise((resolve, reject) => {

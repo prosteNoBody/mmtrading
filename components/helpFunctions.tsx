@@ -82,7 +82,7 @@ const getErrorMessage = (errorCode, defaultMsg) => {
             errorMsg = "You can have only one waiting offer at the time"
             break;
         case 15:
-            errorMsg = "There was problem in fetching your offers"
+            errorMsg = "There was problem in fetching your offer/s"
             break;
         case 16:
             errorMsg = "This is already your url"

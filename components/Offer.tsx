@@ -316,6 +316,7 @@ type Props = {
     user: UserType;
     reloadOffer: () => void;
 }
+
 const Offer: React.FC<Props> = (props) => {
     const {offer: {items, id, is_mine, user_id, buyer_id, trade_id, price, date, status}, user: {name, avatar}, reloadOffer} = props;
     const [itemsDetails, setItemsDetails] = useState(false);
@@ -323,7 +324,7 @@ const Offer: React.FC<Props> = (props) => {
 
     let actionText = "NO ACTION";
     let method:string;
-    let disableAction = true;
+    let disableAction = false;
     if(status === OFFER_STATE.BOT_READY || (status === OFFER_STATE.BUYER_PAY && !is_mine)) {
         if(status === OFFER_STATE.BOT_READY && is_mine) {
             actionText = "CANCEL";
@@ -335,7 +336,8 @@ const Offer: React.FC<Props> = (props) => {
             actionText = "WITHDRAW";
             method = OFFER_REQUESTS.BUYER_WITHDRAW;
         }
-        disableAction = false;
+    } else {
+        disableAction = true;
     }
 
     const [getQuery, {loading}] = useLazyQuery(generateGQLRequest(method, id),{
@@ -484,7 +486,7 @@ const Offer: React.FC<Props> = (props) => {
                     {generateTime()}
                     <DescriptionTitle>PRICE:</DescriptionTitle>
                     <PriceWrapper>{price}</PriceWrapper>
-                    <LazyLoadingButton isLoading={loading} isDisable={disableAction} displayedText={actionText} action={action} small={true} bottomAlign={true}/>
+                    <LazyLoadingButton isLoading={loading} isDisable={disableAction || true} displayedText={actionText} action={action} small={true} bottomAlign={true}/>
                 </DetailsWrapper>
                 {generateItemsDetailButton()}
             </SemiContainer>
