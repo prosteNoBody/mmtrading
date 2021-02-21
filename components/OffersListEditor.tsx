@@ -32,6 +32,7 @@ query ($method: Boolean!){
       user_id
       buyer_id
       is_mine
+      is_buyer
       trade_id
       price
       items{
@@ -101,7 +102,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
     return(
         <Container>
             <TwoButtonSwitch refreshAction={fetchData} changeSwitch={changeSwitch} isOn={offersTypeSwitch} firstSwitchText="My Offers" secondSwitchText="Bought Offers"/>
-            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10} user={user}/>
+            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10} user={user} reloadOffers={fetchData}/>
         </Container>
     );
 };

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState} from 'react';
 import styled from 'styled-components'
 import { useToasts } from 'react-toast-notifications';
 
@@ -6,7 +6,7 @@ import {OfferType, UserType} from "./Types";
 import OFFER_STATE from '../server/types/OfferState';
 import {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} from '../server/config';
 
-import {useLazyQuery, useQuery} from "@apollo/react-hooks";
+import {useLazyQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
 import ItemsManager from "./ItemsManager";
@@ -16,6 +16,7 @@ import LazyLoadingButton from "./LazyLoadingButton";
 import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
+  position: relative;
   margin-bottom: 3rem;
   padding: .5rem;
   
@@ -271,6 +272,28 @@ const CopyLinkWrapper = styled.div`
   grid-area: link;
 `;
 
+const TradeReferenceWrapper = styled.div`
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  
+  display: flex;
+  
+  padding: .5rem;
+  
+  color: var(--color-white);
+  background: var(--color-deepgreen);
+  filter: drop-shadow(0 0 .2rem var(--color-black));
+  font-weight: bold;
+  
+  user-select: none;
+  cursor: pointer;
+`;
+
+const LeftMargin = styled.div`
+  margin-left: .5rem;
+`;
+
 const OFFER_STATE_VALUES = {
     [OFFER_STATE.USER_WITHDRAW] : {
         text: 'Owner withdraw',
@@ -312,6 +335,8 @@ const generateGQLRequest = (method, offerId) => {
     `;
 }
 
+const STEAM_OFFER_LINK = "https://steamcommunity.com/tradeoffer/"
+
 type Props = {
     offer: OfferType;
     user: UserType;
@@ -319,21 +344,21 @@ type Props = {
 }
 
 const Offer: React.FC<Props> = (props) => {
-    const {offer: {items, id, is_mine, user_id, buyer_id, trade_id, price, date, status}, user: {name, avatar}, reloadOffer} = props;
+    const {offer: {items, id, is_mine, is_buyer, trade_id, price, date, status}, user: {name, avatar}, reloadOffer} = props;
     const [itemsDetails, setItemsDetails] = useState(false);
     const {addToast} = useToasts();
 
     let actionText = "NO ACTION";
     let method:string;
     let disableAction = false;
-    if(status === OFFER_STATE.BOT_READY || (status === OFFER_STATE.BUYER_PAY && !is_mine)) {
+    if(status === OFFER_STATE.BOT_READY || (status === OFFER_STATE.BUYER_PAY && is_buyer)) {
         if(status === OFFER_STATE.BOT_READY && is_mine) {
             actionText = "CANCEL";
             method = OFFER_REQUESTS.USER_WITHDRAW;
-        } else if(status === OFFER_STATE.BOT_READY && !is_mine) {
+        } else if(status === OFFER_STATE.BOT_READY) {
             actionText = "BUY";
             method = OFFER_REQUESTS.BUY_OFFER;
-        } else if(status === OFFER_STATE.BUYER_PAY && !is_mine) {
+        } else if(status === OFFER_STATE.BUYER_PAY && is_buyer) {
             actionText = "WITHDRAW";
             method = OFFER_REQUESTS.BUYER_WITHDRAW;
         }
@@ -380,6 +405,7 @@ const Offer: React.FC<Props> = (props) => {
                         appearance: 'success',
                         autoDismiss: true,
                     })
+                    reloadOffer();
                 }
             }
         }),
@@ -464,6 +490,11 @@ const Offer: React.FC<Props> = (props) => {
         </ToggleButtonWrapper>)
     }
 
+    const openSteamOffer = () => {
+        const url = STEAM_OFFER_LINK + trade_id;
+        window.open(url, '_blank');
+    }
+
     const action = () => {
         getQuery();
     }
@@ -471,6 +502,7 @@ const Offer: React.FC<Props> = (props) => {
     return (
         <Container>
             <SemiContainer>
+                {trade_id && <TradeReferenceWrapper onClick={openSteamOffer}>Trade link<LeftMargin><i className="fas fa-share"/></LeftMargin></TradeReferenceWrapper>}
                 <RelativeContainer>
                     <ItemManagerWrapper>
                         <ItemsManager error={items === [] ? null : ""} items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={itemsDetails} itemSize={"100px"}/>
@@ -480,14 +512,14 @@ const Offer: React.FC<Props> = (props) => {
                 <CopyLinkWrapper><CopyLink offerId={id}/></CopyLinkWrapper>
                 <DetailsWrapper>
                     <DescriptionTitle>OWNER:</DescriptionTitle>
-                    <ProfileInfoWrapper>{name} <ProfileImgWrapper><img src={avatar}/></ProfileImgWrapper></ProfileInfoWrapper>
+                    <ProfileInfoWrapper>{name} <ProfileImgWrapper><img src={avatar} alt="profile"/></ProfileImgWrapper></ProfileInfoWrapper>
                     <DescriptionTitle>STATUS:</DescriptionTitle>
                     {generateStatus()}
                     {generateTimeTitle()}
                     {generateTime()}
                     <DescriptionTitle>PRICE:</DescriptionTitle>
                     <PriceWrapper>{price}</PriceWrapper>
-                    <LazyLoadingButton isLoading={loading} isDisable={disableAction || true} displayedText={actionText} action={action} small={true} bottomAlign={true}/>
+                    <LazyLoadingButton isLoading={loading} isDisable={disableAction ?? true} displayedText={actionText} action={action} small={true} bottomAlign={true}/>
                 </DetailsWrapper>
                 {generateItemsDetailButton()}
             </SemiContainer>

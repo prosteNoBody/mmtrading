@@ -35,6 +35,7 @@ query ($offerId: String!){
       user_id
       buyer_id
       is_mine
+      is_buyer
       trade_id
       price
       items{
@@ -102,7 +103,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
             <LazyButtonWrapper>
                 <LazyLoadingButton isLoading={loading} displayedText={"REFRESH"} action={fetchData} small={true}/>
             </LazyButtonWrapper>
-            <OffersManager offers={offers} isLoading={loading} error={error} singleOffer={true} offersPerPage={1} user={user}/>
+            <OffersManager offers={offers} isLoading={loading} error={error} singleOffer={true} offersPerPage={1} user={user} reloadOffers={fetchData}/>
         </Container>
     );
 };

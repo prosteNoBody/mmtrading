@@ -27,7 +27,7 @@ class Database{
             console.log("Successfully connected to DB.");
             this.isConnected = true;
         })
-        .catch(e=>{
+        .catch(e => {
             console.log(e);
             this.isConnected = false;
         });
@@ -90,14 +90,14 @@ class Database{
     async getUserTradeLink(steamid, cb) {
         return await User.findOne({steamid:steamid}).then(user => {
             return cb(user.tradeUrl);
-        }).catch(() => {return {error: 99}})
+        }).catch(() => {return {error: 99}});
     }
 
     async getUserTradeLinkNew(steamid) {
         return new Promise((resolve, reject) => {
             User.findOne({steamid: steamid}).then(user => {
                 resolve(user.tradeUrl);
-            }).catch(e => console.log(e))
+            }).catch(e => console.log(e));
         });
     }
 
@@ -163,7 +163,7 @@ class Database{
                     }
                 }
                 resolve(false);
-            }).catch(e => console.log(e))
+            }).catch(e => console.log(e));
         })
     }
 
@@ -179,7 +179,7 @@ class Database{
                 } else {
                     resolve(true);
                 }
-            }).catch(e => console.log(e))
+            }).catch(e => console.log(e));
         });
     }
 
@@ -198,7 +198,7 @@ class Database{
                 date: (new Date()).toISOString(),
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e))
+            }).catch(e => console.log(e));
         })
     }
 
@@ -235,7 +235,7 @@ class Database{
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.BOT_READY,
             date: (new Date()).toISOString(),
-        }).catch(e => console.log(e))
+        }).catch(e => console.log(e));
     }
 
     async setOfferAsBought(offerId, buyerId) {
@@ -250,7 +250,7 @@ class Database{
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.USER_WITHDRAW,
             date: (new Date()).toISOString(),
-        }).catch(e => console.log(e))
+        }).catch(e => console.log(e));
     }
 
     async setOfferAsCompleted(offerId) {

@@ -86,6 +86,7 @@ class GraphqlApi {
             fields: () => ({
                 id: {type: GraphQLString},
                 is_mine: {type: GraphQLBoolean},
+                is_buyer: {type: GraphQLBoolean},
                 user_id: {type: GraphQLString},
                 buyer_id: {type: GraphQLString},
                 trade_id: {type: GraphQLString},
@@ -377,6 +378,7 @@ class GraphqlApi {
                                 resOffer.push({
                                     id: offer.id,
                                     is_mine: offer.user_id === req.user.steamid,
+                                    is_buyer: offer.buyer_id === req.user.steamid,
                                     user_id: offer.user_id,
                                     buyer_id: offer.buyer_id,
                                     trade_id: offer.trade_id,
@@ -408,6 +410,7 @@ class GraphqlApi {
                             return {offer: {
                                     id: offer.id,
                                     is_mine: offer.user_id === req.user.steamid,
+                                    is_buyer: offer.buyer_id === req.user.steamid,
                                     user_id: offer.user_id,
                                     buyer_id: offer.buyer_id,
                                     trade_id: offer.trade_id,
