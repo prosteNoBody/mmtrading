@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 
-import {OfferType, UserType} from "./Types";
+import {ItemType, OfferType, UserType} from "./Types";
 
 import LoadingIcon from "./LoadingIcon";
 import Offer from "./Offer";
+import {generateBtns} from "./helpFunctions";
 
 type ContainerProps = {
     gridSelector?:string;
@@ -84,11 +85,20 @@ const OffersManager: React.FC<Props> = (props) => {
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
+    const [pageNumber, setPageNumber] = useState(1);
+    let activeOffers:OfferType[] = offers.slice((pageNumber - 1) * offersPerPage, pageNumber * offersPerPage);
+    let maxPage = Math.ceil(offers.length / offersPerPage);
+
+    if(maxPage < pageNumber){
+        if(maxPage > 0 && maxPage !== pageNumber) setPageNumber(maxPage);
+        else if(1 !== pageNumber) setPageNumber(1);
+    }
+
     const createOffer = (offer:OfferType) => {
         return <Offer key={offer.id} offer={offer} user={user} reloadOffer={reloadOffers}/>
     };
 
-    const generateOffers = () => {
+    const generateOffers = (offers) => {
         if(isLoading) return <InsideText>Loading... <LoadingIcon/></InsideText>;
         else if(error) return <InsideText>{error}</InsideText>;
         else if(offers.length === 0) return <InsideText>No offers...</InsideText>
@@ -97,7 +107,8 @@ const OffersManager: React.FC<Props> = (props) => {
 
     return (
         <Container singleOffer={singleOffer}>
-            {generateOffers()}
+            {generateBtns(maxPage, pageNumber, setPageNumber, true)}
+            {generateOffers(activeOffers)}
         </Container>
     );
 };

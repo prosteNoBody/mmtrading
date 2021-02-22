@@ -101,7 +101,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
     return(
         <Container>
             <LazyButtonWrapper>
-                <LazyLoadingButton isLoading={loading} displayedText={"REFRESH"} action={fetchData} small={true}/>
+                <LazyLoadingButton isLoading={false} isDisable={loading} displayedText={"REFRESH"} action={fetchData} small={true}/>
             </LazyButtonWrapper>
             <OffersManager offers={offers} isLoading={loading} error={error} singleOffer={true} offersPerPage={1} user={user} reloadOffers={fetchData}/>
         </Container>

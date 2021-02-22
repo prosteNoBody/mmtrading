@@ -19,13 +19,6 @@ const Container = styled.div`
 `;
 const StyledItemManager = styled(ItemsManager)`
 `;
-const PageBtnContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  
-  z-index: 2;
-`;
 
 type Props = {
     isLoading?: boolean;
@@ -37,9 +30,7 @@ type Props = {
     itemsPerPage: number;
 }
 const ItemsManagerPaged: React.FC<Props> = (props) => {
-    const {items,action,gridSelector, createDescriptions, itemsPerPage} = props;
-    const isLoading = props.isLoading || false;
-    const error = props.error || null;
+    const {items,action,gridSelector, createDescriptions, itemsPerPage, error, isLoading} = props;
 
     const [pageNumber, setPageNumber] = useState(1);
     let activeItems:ItemType[] = items.slice((pageNumber - 1) * itemsPerPage, pageNumber * itemsPerPage);
@@ -53,7 +44,7 @@ const ItemsManagerPaged: React.FC<Props> = (props) => {
     return (
         <Container gridSelector={gridSelector}>
             <StyledItemManager isLoading={isLoading} error={error} items={activeItems} action={action} gridSelector={'null'} createDescriptions={createDescriptions}/>
-            <PageBtnContainer>{generateBtns(maxPage, pageNumber, setPageNumber)}</PageBtnContainer>
+            {generateBtns(maxPage, pageNumber, setPageNumber)}
         </Container>
     );
 };

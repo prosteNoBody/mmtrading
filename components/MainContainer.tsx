@@ -3,8 +3,7 @@ import styled from "styled-components";
 const MainContainer = styled.div`
   display:grid;
   min-width: 1100px;
-  height: 100vh;
-  max-height: 100vh;
+  min-height: 675px;
   
   grid-template-columns: 1fr;
   grid-template-rows: 5.5rem calc(100vh - 5.5rem);

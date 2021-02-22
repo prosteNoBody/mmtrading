@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import React from "react";
 
+type PageBtnProps = {
+    topPaging: boolean;
+}
 const PageBtn = styled.div`
   display: flex;
   justify-content: center;
@@ -8,7 +11,7 @@ const PageBtn = styled.div`
 
   width: 2.6rem;
   height: 2.6rem;
-  margin: 0.7rem 0.7rem 0;
+  margin: ${(props: PageBtnProps) => props.topPaging ? '0 .7rem .7rem 0' : '0.7rem 0.7rem 0 0'};
 
   color: var(--color-white);
   background: var(--color-arcana);
@@ -20,20 +23,28 @@ const PageBtn = styled.div`
   user-select: none;
 `;
 
+const PageBtnContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  
+  z-index: 2;
+`;
+
 const PageBtnActive = styled(PageBtn)`
   color: var(--color-arcana);
   background: var(--color-white);
   border: 3px solid var(--color-arcana);
 `;
 
-const generateBtns = (maxPage, pageNumber, setPageNumber) => {
+const generateBtns = (maxPage, pageNumber, setPageNumber, topPaging = false) => {
     if(maxPage === 1) return false;
     let res = [];
     for(let i = 1; i <= maxPage;i++){
-        if(i === pageNumber) res.push(<PageBtnActive key={i} onClick={() => setPageNumber(i)}>{i}</PageBtnActive>)
-        else res.push(<PageBtn key={i} onClick={() => setPageNumber(i)}>{i}</PageBtn>)
+        if(i === pageNumber) res.push(<PageBtnActive key={i} onClick={() => setPageNumber(i)} topPaging={topPaging}>{i}</PageBtnActive>)
+        else res.push(<PageBtn key={i} onClick={() => setPageNumber(i)} topPaging={topPaging}>{i}</PageBtn>)
     }
-    return res;
+    return (<PageBtnContainer>{res}</PageBtnContainer>);
 }
 
 const getErrorMessage = (errorCode, defaultMsg) => {
