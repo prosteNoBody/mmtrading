@@ -2,7 +2,7 @@ import React, { useState} from 'react';
 import styled from 'styled-components'
 import { useToasts } from 'react-toast-notifications';
 
-import {OfferType, UserType} from "./Types";
+import {OfferType} from "./Types";
 import OFFER_STATE from '../server/types/OfferState';
 import {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} from '../server/config';
 

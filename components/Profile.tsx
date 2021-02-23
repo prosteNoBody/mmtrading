@@ -1,5 +1,4 @@
 import React, { useState, useEffect} from 'react';
-import Link from 'next/link';
 import styled from 'styled-components'
 
 import {UserType, OpenType} from './Types';

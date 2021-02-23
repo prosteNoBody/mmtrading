@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
-import {ItemType, OfferType, UserType} from "./Types";
+import {OfferType} from "./Types";
 
 import LoadingIcon from "./LoadingIcon";
 import Offer from "./Offer";

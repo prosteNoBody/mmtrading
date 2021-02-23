@@ -49,26 +49,6 @@ class SteamBot {
             this.community.startConfirmationChecker(30000,this.config.bot_identity_secret);
         });
     }
-    //OUTDATED
-    getUserItems = (steamid,cb) => {
-        this.manager.getUserInventoryContents(steamid,570,2,true, (error,inventory) => {
-            if(error)
-                error = "File could not be loaded, your profile may be private!";
-            if(!error){
-                inventory = inventory.map(item => {
-                    return{
-                        index: item.pos,
-                        assetid:item.assetid,
-                        name: item.market_name,
-                        icon_url: item.getImageURL() + "200x200",
-                        rarity: item.tags[1].name,
-                        color: item.tags[1].color,
-                    };
-                });
-            }
-            cb(error,inventory);
-        });
-    };
     getBotItems = async (tradeable = true) => {
         return new Promise((resolve, reject) => {
             this.manager.getInventoryContents(570,2,tradeable, (error, inventory) => {

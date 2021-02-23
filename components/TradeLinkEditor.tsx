@@ -3,7 +3,7 @@ import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
 
 import LazyLoadingButton from "./LazyLoadingButton";
-import {useLazyQuery, useQuery} from "@apollo/react-hooks";
+import {useLazyQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 import {getErrorMessage} from "./helpFunctions";
 

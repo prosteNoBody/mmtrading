@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components'
+import {ItemType} from "./Types";
 
 const Container = styled.div`
   position: relative;
@@ -51,48 +52,6 @@ const Rarity = styled.div`
 `;
 const Img = styled.img`
   vertical-align: bottom;
-`;
-
-type ImgPlaceholderProps = {
-    display: boolean;
-}
-const ImgPlaceholder = styled.div`
-  display: ${(props:ImgPlaceholderProps) => (props.display ? "flex" : "none")};
-  justify-content: center;
-  align-items: center;
-
-  width: 120px;
-  
-  background: var(--color-gray);
-  color: whitesmoke;
-  
-  font-size: 1.5rem;
-  
-  &::after{
-      content: "";
-      position: absolute;
-      
-      width: 100%;
-      height: 100%;
-      
-      background: rgba(255, 255, 255, 0.2);
-      
-      opacity: 1;
-      
-      animation: shine 2s infinite ease-out;
-  }
-  
-  @keyframes shine{
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
 `;
 const WrapHiddenOverflow = styled.div`
   position: relative;
@@ -187,37 +146,14 @@ const Description = styled.div`
   
   font-size: 0.8rem;
 `;
-const LoadingI = styled.i`
-  animation: rotate 1.5s infinite ease-in-out;
-  
-  @keyframes rotate{
-    0%{
-        transform: rotate(0deg);
-    }
-    100%{
-        transform: rotate(360deg);
-    }
-  }
-`;
-
-type Description = {
-    type: string;
-    value: string;
-    color?: string;
-}
 type Props = {
-    assetid: number;
-    imageUrl: string;
-    name: string;
-    rarity: string;
-    color: string;
-    descriptions: Description[];
+    item: ItemType;
     action:(id:number) => void;
     createDescription: boolean;
     itemSize?: string;
 }
 const Item: React.FC<Props> = (props) => {
-    const {assetid,name,rarity,imageUrl,color,descriptions,action,createDescription, itemSize} = props;
+    const {item: {assetid, color, descriptions, rarity, icon_url},action,createDescription, itemSize} = props;
     const [detailOpen, setDetailOpen] = useState(false);
     let node = null;
 
@@ -244,7 +180,7 @@ const Item: React.FC<Props> = (props) => {
 
 
     const createDescriptions = (descriptions) => {
-        return descriptions.map((description:Description,index:number) => {
+        return descriptions.map((description,index:number) => {
             return <Description key={assetid + index} rarityColor={description.color} dangerouslySetInnerHTML={{
                 __html:description.value.replace(/color: rgb\(255, 255, 255\)/gm, 'rgb(0, 0, 0)')
             }}/>
@@ -267,7 +203,7 @@ const Item: React.FC<Props> = (props) => {
     return (
         <Container ref={element => node = element} onMouseDown={handleClick} onContextMenu={(e) => {e.preventDefault()}}>
             <WrapHiddenOverflow onClick={() => action(assetid)} rarityColor={color} size={itemSize}>
-                <Img width={itemSize || "120px"} alt={'item'} src={imageUrl}/>
+                <Img width={itemSize || "120px"} alt={'item'} src={icon_url}/>
                 {/*<ImgPlaceholder display={loadingImg}><LoadingI aria-hidden className="fas fa-hat-wizard"/></ImgPlaceholder>*/}
                 <RarityImg rarityColor={color}>{rarity}</RarityImg>
                 {createDescription ? <MouseIcon img="/mouseIcon.svg"/> : ''}

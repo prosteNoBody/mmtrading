@@ -57,16 +57,6 @@ app.prepare().then(() => {
         res.redirect(indexPage);
     });
 
-    server.get('/api/inventory', auth.apiIsAuth, (req, res) => {
-        bot.getUserItems(req.user.steamid, (error, inventory) => {
-            if (error) {
-                res.send({ error: error });
-            } else {
-                res.send({inventory});
-            }
-        })
-    });
-
     server.all('/api', expressGraphQL({
         graphiql: true,
         schema: graphqlApi.getAuthRootQuery()

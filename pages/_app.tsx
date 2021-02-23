@@ -7,7 +7,7 @@ import { ApolloProvider } from '@apollo/react-hooks';
 import { ToastProvider } from 'react-toast-notifications';
 
 const client = new ApolloClient({
-    uri: 'http://localhost:3000/api',
+    uri: window.location.origin + '/api',
     fetch: fetch,
 });
 

@@ -85,7 +85,7 @@ const ItemsManager: React.FC<Props> = (props) => {
     const error = props.error || false;
 
     const createItem = (item:ItemType,action) => {
-        return <Item createDescription={createDescriptions} key={item.assetid} assetid={item.assetid} imageUrl={item.icon_url} name={item.name} rarity={item.rarity} color={item.color} descriptions={item.descriptions} action={action} itemSize={itemSize}/>
+        return <Item createDescription={createDescriptions} key={item.assetid} action={action} itemSize={itemSize} item={item}/>
     };
 
     const generateItems = () => {

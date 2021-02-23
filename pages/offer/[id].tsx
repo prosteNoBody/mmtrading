@@ -23,7 +23,7 @@ const offers = (props:Props) => {
                 <title>MMTrading | Offer</title>
             </Head>
             <Navbar user={user}/>
-            <SingleOfferEditor offerId={id} user={user}/>
+            <SingleOfferEditor offerId={id}/>
         </MainContainer>
     );
 };

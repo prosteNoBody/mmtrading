@@ -1,4 +1,3 @@
-import Link from "next/link";
 import * as React from "react";
 import Head from "next/head";
 import {IncomingMessage} from "http";
@@ -9,15 +8,12 @@ import {UserType} from '../components/Types';
 import MainContainer from "../components/MainContainer";
 import Navbar from "../components/Navbar";
 import SettingsEditor from "../components/SettingsEditor";
-import OfferEditor from "../components/OfferEditor";
 
 type Props = {
     user?: UserType;
 }
 const dashboard = (props:Props) => {
     const {user} = props;
-    const avatar = user ? user.avatar : "";
-    const persona = user ? user.name : "";
     return (
         <MainContainer>
             <Head>
