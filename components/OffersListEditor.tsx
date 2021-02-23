@@ -1,14 +1,13 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useToasts } from 'react-toast-notifications';
 import styled from 'styled-components';
 
-import {useLazyQuery, useQuery} from "@apollo/react-hooks";
+import {useLazyQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
 
 import TwoButtonSwitch from "./TwoButtonSwitch";
 import OffersManager from "./OffersManager";
-import LoadingIcon from "./LoadingIcon";
-import {OfferType, UserType} from "./Types";
+import {OfferType} from "./Types";
 import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
@@ -29,8 +28,10 @@ query ($method: Boolean!){
     error
     offers{
       id
-      user_id
-      buyer_id
+      owner{
+        name
+        avatar
+      }
       is_mine
       is_buyer
       trade_id
@@ -52,11 +53,8 @@ query ($method: Boolean!){
     }
   }
 }`;
-type Props = {
-    user: UserType;
-}
-const OffersListEditor:React.FC<Props> = (props) => {
-    const {user} = props;
+
+const OffersListEditor:React.FC = () => {
     const [offersTypeSwitch, setOffersTypeSwitch] = useState(true);
     const [offers, setOffers] = useState<OfferType[]>([]);
     const [error, setError] = useState("");
@@ -102,7 +100,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
     return(
         <Container>
             <TwoButtonSwitch refreshAction={fetchData} changeSwitch={changeSwitch} isOn={offersTypeSwitch} firstSwitchText="My Offers" secondSwitchText="Bought Offers"/>
-            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10} user={user} reloadOffers={fetchData}/>
+            <OffersManager offers={offers} isLoading={loading} error={error} offersPerPage={10} reloadOffers={fetchData}/>
         </Container>
     );
 };

@@ -9,7 +9,7 @@ const {
 } = require('graphql');
 
 const {createDummyOfferKey} = require('../keys.json');
-const { extractTokenFromUrl } = require('../helpFunctions');
+const { extractTokenFromUrl, indexUsers } = require('../helpFunctions');
 
 const OFFER_STATE = require('../types/OfferState');
 
@@ -60,6 +60,16 @@ class GraphqlApi {
             })
         })
 
+        this.OwnerType = new GraphQLObjectType({
+            name: 'BuyerInfo',
+            description: 'Buyers info',
+            fields: () => ({
+                owner_id: {type: GraphQLString},
+                name: {type: GraphQLString},
+                avatar: {type: GraphQLString},
+            })
+        })
+
         this.TradeUrl = new GraphQLObjectType({
             name: 'TradeUrl',
             description: 'tradelink resolver',
@@ -86,8 +96,8 @@ class GraphqlApi {
             fields: () => ({
                 id: {type: GraphQLString},
                 is_mine: {type: GraphQLBoolean},
-                is_buyer: {type: GraphQLBoolean},
-                user_id: {type: GraphQLString},
+                is_buyer: {type: GraphQLString},
+                owner: {type: this.OwnerType},
                 buyer_id: {type: GraphQLString},
                 trade_id: {type: GraphQLString},
                 price: {type: GraphQLFloat},
@@ -160,7 +170,8 @@ class GraphqlApi {
                         try{
                             const items = await steamBot.GraphQLGetUserItems(req.user.steamid);
                             return {items: items};
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: error};
                         }
                     }
@@ -194,7 +205,8 @@ class GraphqlApi {
                             const partnerid = steamBot.getPartnerId(req.user.steamid);
                             const newTradeUrl = await db.updateAndGetUserTradeLinkNew(req.user.steamid, token, partnerid);
                             return {tradeurl: newTradeUrl, changed: true};
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return { error: 99 };
                         }
                     }
@@ -235,7 +247,8 @@ class GraphqlApi {
                             } catch {
                                 return {error: 13};
                             }
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 99};
                         }
                     }
@@ -262,7 +275,7 @@ class GraphqlApi {
                             if(await db.userAlreadyHaveActiveTrade(req.user.steamid, OFFER_STATE.BOT_READY)){
                                 return {error: 5};
                             }
-                            if(offer.status !== OFFER_STATE.BOT_READY || offer.user_id !== req.user.steamid) {
+                            if(offer.status !== OFFER_STATE.BOT_READY || offer.owner_id !== req.user.steamid) {
                                 return {error: 3};
                             }
                             if(!await steamBot.validateBotOfferItems(offer.items)) {
@@ -275,7 +288,8 @@ class GraphqlApi {
                             } catch {
                                 return {error: 6};
                             }
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 99};
                         }
                     }
@@ -295,7 +309,7 @@ class GraphqlApi {
                             if(!offer) {
                                 return {error: 7};
                             }
-                            if(offer.user_id === req.user.steamid) {
+                            if(offer.owner_id === req.user.steamid) {
                                 return {error: 8};
                             }
                             if(offer.status !== OFFER_STATE.BOT_READY) {
@@ -308,14 +322,15 @@ class GraphqlApi {
                             if(buyerCredit < offer.price) {
                                 return {error: 20};
                             }
-                            const sellerCredit = await db.getUserCredit(offer.user_id);
+                            const sellerCredit = await db.getUserCredit(offer.owner_id);
                             await Promise.all([
                                 db.updateUserCredit(req.user.steamid, buyerCredit - offer.price),
-                                db.updateUserCredit(offer.user_id, sellerCredit + offer.price),
+                                db.updateUserCredit(offer.owner_id, sellerCredit + offer.price),
                                 db.setOfferAsBought(offer.id, req.user.steamid)
                             ]);
                             return {success: true};
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 99};
                         }
                     }
@@ -355,7 +370,8 @@ class GraphqlApi {
                             } catch {
                                 return {error: 6};
                             }
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 99};
                         }
                     }
@@ -371,15 +387,16 @@ class GraphqlApi {
                             return {error: 1};
                         }
                         try {
-                            let offers = method ? (await db.getUserOffers(req.user.steamid)) : (await db.getBoughtOffers(req.user.steamid));
-                            let botItems = await steamBot.getBotItems(false);
+                            const offers = method ? (await db.getUserOffers(req.user.steamid)) : (await db.getBoughtOffers(req.user.steamid));
+                            const botItems = await steamBot.getBotItems(false);
+                            const user = indexUsers(await db.getAllUsers());
                             let resOffer = [];
                             for(let offer of offers) {
                                 resOffer.push({
                                     id: offer.id,
-                                    is_mine: offer.user_id === req.user.steamid,
+                                    is_mine: offer.owner_id === req.user.steamid,
                                     is_buyer: offer.buyer_id === req.user.steamid,
-                                    user_id: offer.user_id,
+                                    owner: user[offer.owner_id],
                                     buyer_id: offer.buyer_id,
                                     trade_id: offer.trade_id,
                                     price: offer.price,
@@ -389,7 +406,8 @@ class GraphqlApi {
                                 })
                             }
                             return {offers: resOffer};
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 15};
                         }
                     }
@@ -405,13 +423,14 @@ class GraphqlApi {
                             return {error: 1};
                         }
                         try {
-                            let offer = await db.getOffer(offerId);
-                            let botItems = await steamBot.getBotItems(false);
+                            const offer = await db.getOffer(offerId);
+                            const botItems = await steamBot.getBotItems(false);
+                            const owner = await db.getUser(offer.owner_id);
                             return {offer: {
                                     id: offer.id,
-                                    is_mine: offer.user_id === req.user.steamid,
+                                    is_mine: offer.owner_id === req.user.steamid,
                                     is_buyer: offer.buyer_id === req.user.steamid,
-                                    user_id: offer.user_id,
+                                    owner: owner,
                                     buyer_id: offer.buyer_id,
                                     trade_id: offer.trade_id,
                                     price: offer.price,
@@ -419,7 +438,8 @@ class GraphqlApi {
                                     date: offer.date,
                                     status: offer.status,
                             }};
-                        } catch {
+                        } catch (e) {
+                            console.log(e)
                             return {error: 15};
                         }
                     }

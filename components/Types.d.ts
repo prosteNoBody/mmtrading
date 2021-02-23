@@ -2,7 +2,11 @@ type OfferType = {
     id: string;
     is_mine: boolean;
     is_buyer: boolean;
-    user_id: string;
+    owner: {
+        owner_id: string;
+        name: string;
+        avatar: string;
+    };
     buyer_id: string;
     trade_id: string;
     price: number;

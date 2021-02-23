@@ -76,12 +76,11 @@ type Props = {
     error?: string;
     offers: OfferType[];
     offersPerPage?: number;
-    user: UserType;
     singleOffer?: boolean;
     reloadOffers: () => void;
 }
 const OffersManager: React.FC<Props> = (props) => {
-    const {offers, offersPerPage, user, singleOffer, reloadOffers} = props;
+    const {offers, offersPerPage, singleOffer, reloadOffers} = props;
     const isLoading = props.isLoading || false;
     const error = props.error || false;
 
@@ -95,7 +94,7 @@ const OffersManager: React.FC<Props> = (props) => {
     }
 
     const createOffer = (offer:OfferType) => {
-        return <Offer key={offer.id} offer={offer} user={user} reloadOffer={reloadOffers}/>
+        return <Offer key={offer.id} offer={offer} reloadOffer={reloadOffers}/>
     };
 
     const generateOffers = (offers) => {

@@ -19,6 +19,11 @@ class Config {
     }
 }
 
+const handleError = (reject) => (e) => {
+    console.log(e);
+    reject(e);
+};
+
 class Database{
     constructor(config){
         this.config = new Config(config);
@@ -38,7 +43,7 @@ class Database{
             new Offer({
                 id: uuid.v4(),
                 trade_id: "",
-                user_id: steamid,
+                owner_id: steamid,
                 buyer_id: "",
                 items: items,
                 price: Math.ceil(Math.random() * 20),
@@ -53,11 +58,37 @@ class Database{
         });
     }
 
+    async getUser(steamid) {
+        return new Promise((resolve, reject) => {
+            User.findOne({steamid: steamid}).then(user => {
+                resolve({
+                    steamid: user.steamid,
+                    name: user.name,
+                    avatar: user.avatar,
+                });
+            }).catch(handleError(reject));
+        })
+    }
+
+    async getAllUsers() {
+        return new Promise((resolve, reject) => {
+            User.find({}).then(users => {
+                resolve(users.map(user => {
+                    return {
+                        steamid: user.steamid,
+                        name: user.name,
+                        avatar: user.avatar,
+                    };
+                }));
+            }).catch(handleError(reject));
+        });
+    }
+
     async getUserOffers(steamid) {
         return new Promise((resolve, reject) => {
-            Offer.find({user_id: steamid}).then(offers => {
+            Offer.find({owner_id: steamid}).then(offers => {
                 resolve(offers);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -65,7 +96,7 @@ class Database{
         return new Promise((resolve, reject) => {
             Offer.find({buyer_id: steamid}).then(offers => {
                 resolve(offers);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -73,7 +104,7 @@ class Database{
         return new Promise((resolve, reject) => {
             User.findOne({steamid:steamid}).then(user => {
                 resolve(user.credit);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -83,7 +114,7 @@ class Database{
                 credit: newCredit,
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -97,7 +128,7 @@ class Database{
         return new Promise((resolve, reject) => {
             User.findOne({steamid: steamid}).then(user => {
                 resolve(user.tradeUrl);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -115,7 +146,7 @@ class Database{
                 tradeUrl: steam_link
             },{new: true}).then(user => {
                 resolve(user.tradeUrl);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -124,7 +155,7 @@ class Database{
             new Offer({
                 id: uuid.v4(),
                 trade_id: tradeid,
-                user_id: steamid,
+                owner_id: steamid,
                 buyer_id: "",
                 items: items,
                 price: price,
@@ -132,14 +163,14 @@ class Database{
                 status: OFFER_STATE.INITIAL_CREATE,
             }).save().then(offer => {
                 return resolve(offer.id);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
     async userAlreadyHaveWaitingOffer(steamid) {
         return new Promise((resolve, reject) => {
             Offer.find({
-                user_id: steamid,
+                owner_id: steamid,
                 status: OFFER_STATE.INITIAL_CREATE,
             }).then( offers => {
                 if(offers.length === 0) {
@@ -147,14 +178,14 @@ class Database{
                 } else {
                     resolve(true);
                 }
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
     async userAlreadyHaveActiveTrade(steamid, offerType) {
         return new Promise((resolve, reject) => {
             Offer.find({
-                user_id: steamid,
+                owner_id: steamid,
                 status: offerType,
             }).then( offers => {
                 for(const offer of offers) {
@@ -163,14 +194,14 @@ class Database{
                     }
                 }
                 resolve(false);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
     async userAlreadyHaveWithdrawOffer(steamid) {
         return new Promise((resolve, reject) => {
             Offer.find({
-                user_id: steamid,
+                owner_id: steamid,
                 trade_id: "",
                 status: OFFER_STATE.BOT_READY,
             }).then( offers => {
@@ -179,7 +210,7 @@ class Database{
                 } else {
                     resolve(true);
                 }
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -187,7 +218,7 @@ class Database{
         return new Promise((resolve, reject) => {
             Offer.findOne({trade_id: tradeId}).then(offer => {
                 resolve(offer);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -198,7 +229,7 @@ class Database{
                 date: (new Date()).toISOString(),
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -206,7 +237,7 @@ class Database{
         return new Promise((resolve, reject) => {
             Offer.findOne({id: offerId}).then(offer => {
                 resolve(offer);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -219,7 +250,7 @@ class Database{
                 status: OFFER_STATE.BOT_HOLDING,
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -227,7 +258,7 @@ class Database{
         return new Promise((resolve, reject) => {
             Offer.find({status: OFFER_STATE.BOT_HOLDING}).then( offers => {
                 resolve(offers);
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -235,7 +266,7 @@ class Database{
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.BOT_READY,
             date: (new Date()).toISOString(),
-        }).catch(e => console.log(e));
+        }).catch(handleError(reject));
     }
 
     async setOfferAsBought(offerId, buyerId) {
@@ -243,20 +274,20 @@ class Database{
             status: OFFER_STATE.BUYER_PAY,
             date: (new Date()).toISOString(),
             buyer_id: buyerId,
-        }).catch(e => console.log(e));
+        }).catch(handleError(reject));
     }
 
     async setOfferAsWithdraw(offerId) {
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.USER_WITHDRAW,
             date: (new Date()).toISOString(),
-        }).catch(e => console.log(e));
+        }).catch(handleError(reject));
     }
 
     async setOfferAsCompleted(offerId) {
         Offer.findOneAndUpdate({id: offerId}, {
             status: OFFER_STATE.COMPLETED,
-        }).catch(e => console.log(e));
+        }).catch(handleError(reject));
     }
 
     async isWithdrawActive(offerId) {
@@ -269,7 +300,7 @@ class Database{
                 } else {
                     resolve(true);
                 }
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -284,7 +315,7 @@ class Database{
                 } else {
                     resolve(true);
                 }
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         });
     }
 
@@ -294,7 +325,7 @@ class Database{
                 trade_id: "",
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 
@@ -304,7 +335,7 @@ class Database{
                 trade_id: tradeId,
             }).then(() => {
                 resolve();
-            }).catch(e => console.log(e));
+            }).catch(handleError(reject));
         })
     }
 }

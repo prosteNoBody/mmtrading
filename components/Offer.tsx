@@ -339,12 +339,11 @@ const STEAM_OFFER_LINK = "https://steamcommunity.com/tradeoffer/"
 
 type Props = {
     offer: OfferType;
-    user: UserType;
     reloadOffer: () => void;
 }
 
 const Offer: React.FC<Props> = (props) => {
-    const {offer: {items, id, is_mine, is_buyer, trade_id, price, date, status}, user: {name, avatar}, reloadOffer} = props;
+    const {offer: {items, id, is_mine, is_buyer, owner: {name, avatar}, trade_id, price, date, status}, reloadOffer} = props;
     const [itemsDetails, setItemsDetails] = useState(false);
     const {addToast} = useToasts();
 

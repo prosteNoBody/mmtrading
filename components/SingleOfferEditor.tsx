@@ -32,8 +32,10 @@ query ($offerId: String!){
     error
     offer{
       id
-      user_id
-      buyer_id
+      owner{
+        name
+        avatar
+      }
       is_mine
       is_buyer
       trade_id
@@ -57,10 +59,9 @@ query ($offerId: String!){
 }`;
 type Props = {
     offerId: string | string[];
-    user: UserType;
 }
 const OffersListEditor:React.FC<Props> = (props) => {
-    const {user, offerId} = props;
+    const {offerId} = props;
     const [offers, setOffers] = useState<OfferType[]>([]);
     const [error, setError] = useState("");
     const { addToast } = useToasts();
@@ -103,7 +104,7 @@ const OffersListEditor:React.FC<Props> = (props) => {
             <LazyButtonWrapper>
                 <LazyLoadingButton isLoading={false} isDisable={loading} displayedText={"REFRESH"} action={fetchData} small={true}/>
             </LazyButtonWrapper>
-            <OffersManager offers={offers} isLoading={loading} error={error} singleOffer={true} offersPerPage={1} user={user} reloadOffers={fetchData}/>
+            <OffersManager offers={offers} isLoading={loading} error={error} singleOffer={true} offersPerPage={1} reloadOffers={fetchData}/>
         </Container>
     );
 };

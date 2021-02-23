@@ -20,6 +20,19 @@ const extractTokenFromUrl = (url) => {
     }
 }
 
+const indexUsers = (users) => {
+    let resUser = {};
+    for(let user of users) {
+        resUser[user.steamid] = {
+            buyer_id: user.steamid,
+            name: user.name,
+            avatar: user.avatar,
+        }
+    }
+    return resUser;
+};
+
 module.exports = {
     extractTokenFromUrl,
+    indexUsers,
 }
