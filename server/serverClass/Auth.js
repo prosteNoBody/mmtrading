@@ -3,6 +3,7 @@ const SteamStrategy = require("passport-steam").Strategy;
 const User = require("../models/User");
 
 const API_KEY = require('../keys.json').steamApi;
+const {REALM_URL, RETURN_URL} = require('../config');
 
 class Auth{
     constructor(login,profile){
@@ -22,8 +23,8 @@ class Auth{
                 });
         });
         passport.use(new SteamStrategy({
-            returnURL: 'http://localhost:3000/auth/return',
-            realm: 'http://localhost:3000',
+            returnURL: RETURN_URL,
+            realm: REALM_URL,
             apiKey: API_KEY,
         }, (identifier, profile, done) => {
             /**
