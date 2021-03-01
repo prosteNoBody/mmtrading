@@ -153,7 +153,7 @@ type Props = {
     itemSize?: string;
 }
 const Item: React.FC<Props> = (props) => {
-    const {item: {assetid, color, descriptions, rarity, icon_url},action,createDescription, itemSize} = props;
+    const {item: {assetid, name, color, descriptions, rarity, icon_url},action,createDescription, itemSize} = props;
     const [detailOpen, setDetailOpen] = useState(false);
     let node = null;
 
