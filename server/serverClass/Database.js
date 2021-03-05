@@ -263,31 +263,39 @@ class Database{
     }
 
     async setOfferForWithdraw(offerId) {
-        Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.BOT_READY,
-            date: (new Date()).toISOString(),
-        }).catch(handleError(reject));
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offerId}, {
+                status: OFFER_STATE.BOT_READY,
+                date: (new Date()).toISOString(),
+            }).catch(handleError(reject));
+        })
     }
 
     async setOfferAsBought(offerId, buyerId) {
-        Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.BUYER_PAY,
-            date: (new Date()).toISOString(),
-            buyer_id: buyerId,
-        }).catch(handleError(reject));
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offerId}, {
+                status: OFFER_STATE.BUYER_PAY,
+                date: (new Date()).toISOString(),
+                buyer_id: buyerId,
+            }).catch(handleError(reject));
+        })
     }
 
     async setOfferAsWithdraw(offerId) {
-        Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.USER_WITHDRAW,
-            date: (new Date()).toISOString(),
-        }).catch(handleError(reject));
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offerId}, {
+                status: OFFER_STATE.USER_WITHDRAW,
+                date: (new Date()).toISOString(),
+            }).catch(handleError(reject));
+        })
     }
 
     async setOfferAsCompleted(offerId) {
-        Offer.findOneAndUpdate({id: offerId}, {
-            status: OFFER_STATE.COMPLETED,
-        }).catch(handleError(reject));
+        return new Promise((resolve, reject) => {
+            Offer.findOneAndUpdate({id: offerId}, {
+                status: OFFER_STATE.COMPLETED,
+            }).catch(handleError(reject));
+        })
     }
 
     async isWithdrawActive(offerId) {
