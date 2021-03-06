@@ -479,11 +479,11 @@ const Offer: React.FC<Props> = (props) => {
                 Item details:
                 <ToggleButton
                     isDisable={items.length === 0}
-                    isToggled={itemsDetails}
+                    isToggled={!itemsDetails}
                     onClick={() => {
                         if (items.length !== 0) setItemsDetails(!itemsDetails)
                     }}>
-                    {items.length === 0 ? 'DISABLED' : itemsDetails ? 'OFF' : 'ON'}
+                    {items.length === 0 ? 'DISABLED' : !itemsDetails ? 'OFF' : 'ON'}
                 </ToggleButton>
             </ToggleButtonWrapperWrapper>
         </ToggleButtonWrapper>)
