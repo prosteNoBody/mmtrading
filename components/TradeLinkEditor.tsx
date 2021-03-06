@@ -8,7 +8,6 @@ import {gql} from 'apollo-boost';
 import {getErrorMessage} from "./helpFunctions";
 
 const Container = styled.div`
-  width: 80%;
   padding: 2rem;
   
   display: flex;
@@ -66,9 +65,6 @@ const TradeLinkTitle = styled.div`
   font-size: 2rem;
 `;
 
-type Props = {
-    action: () => void;
-}
 type TradeLink = {
     getTradeUrl?: {
         error?: string,
@@ -85,14 +81,14 @@ query ($tradeUrl: String!){
         changed
     }
 }`;
-const TradeLinkEditor: React.FC<Props> = (props) => {
+const TradeLinkEditor: React.FC = () => {
     const [tradeUrl, setTradeUrl] = useState("");
     const { addToast } = useToasts();
     const inputEl = useRef(null);
 
-    const [getQuery, {loading, error }] = useLazyQuery<TradeLink>(TRADELINK_REQUEST,{
+    const [getQuery, {loading}] = useLazyQuery<TradeLink>(TRADELINK_REQUEST,{
         fetchPolicy: 'network-only',
-        onCompleted: (data => {
+        onCompleted: data => {
             if(data) {
                 if(data.getTradeUrl?.error) {
                     addToast(getErrorMessage(data.getTradeUrl.error, "There was an error during data request") , {
@@ -108,14 +104,15 @@ const TradeLinkEditor: React.FC<Props> = (props) => {
                     }
                     setTradeUrl(data.getTradeUrl?.tradeurl);
                 }
-            } else if(error) {
-                addToast("There was an error during data request" , {
-                    appearance: 'error',
-                    autoDismiss: true,
-                })
             }
             inputEl.current.focus();
-        })
+        },
+        onError: () => {
+            addToast("There was an error during data request" , {
+                appearance: 'error',
+                autoDismiss: true,
+            })
+        }
     });
 
     useEffect(() => {

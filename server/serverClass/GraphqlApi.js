@@ -90,6 +90,16 @@ class GraphqlApi {
             })
         })
 
+        this.CreditResponse = new GraphQLObjectType({
+            name: 'SimpleResponse',
+            description: 'Return error or success boolean',
+            fields: () => ({
+                error: {type: GraphQLInt},
+                success: {type: GraphQLBoolean},
+                credit: {type: GraphQLFloat},
+            })
+        })
+
         this.Offer = new GraphQLObjectType({
             name: 'Offer',
             description: 'Return offer object',
@@ -441,6 +451,40 @@ class GraphqlApi {
                         } catch (e) {
                             console.log(e)
                             return {error: 15};
+                        }
+                    }
+                },
+                getCredit: {
+                    type: this.CreditResponse,
+                    description: 'Add credit to your account',
+                    args: {
+                        option: {type: GraphQLInt},
+                    },
+                    resolve: async (parent, {option}, req) => {
+                        if (!req.user) {
+                            return {error: 1};
+                        }
+                        let creditResult;
+                        switch (option) {
+                            case 1:
+                                creditResult = 5;
+                                break;
+                            case 2:
+                                creditResult = 25;
+                                break;
+                            case 3:
+                                creditResult = 50;
+                                break;
+                        }
+                        if(!creditResult) {
+                            return {error: 21};
+                        }
+                        try {
+                            const userCredit = await db.getUserCredit(req.user.steamid);
+                            const newCredit = await db.updateUserCredit(req.user.steamid, userCredit + creditResult);
+                            return {success: true, credit: newCredit};
+                        } catch {
+                            return {error: 99}
                         }
                     }
                 }

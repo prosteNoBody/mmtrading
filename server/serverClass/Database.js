@@ -113,7 +113,7 @@ class Database{
             User.findOneAndUpdate({steamid: steamid}, {
                 credit: newCredit,
             }).then(() => {
-                resolve();
+                resolve(newCredit);
             }).catch(handleError(reject));
         })
     }

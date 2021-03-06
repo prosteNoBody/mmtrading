@@ -2,12 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import TradeLinkEditor from "./TradeLinkEditor";
+import CreditEditor from "./CreditEditor";
 
 const Container = styled.div`
   grid-area: main-content;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-around;
     
   padding: 2rem;
   
@@ -18,7 +19,8 @@ const Container = styled.div`
 const OfferEditor = () => {
     return (
         <Container>
-            <TradeLinkEditor action={() => {}}/>
+            <TradeLinkEditor/>
+            <CreditEditor/>
         </Container>
     );
 };

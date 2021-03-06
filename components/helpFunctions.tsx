@@ -110,6 +110,9 @@ const getErrorMessage = (errorCode, defaultMsg) => {
         case 20:
             errorMsg = "You don't have enough credit for this offer"
             break;
+        case 21:
+            errorMsg = "You picked invalid option"
+            break;
     }
     return errorMsg;
 }
