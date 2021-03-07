@@ -150,10 +150,10 @@ class Database{
         })
     }
 
-    async createNewOffer(steamid, tradeid, items, price) {
+    async createNewOffer(steamid, tradeid, items, price, offerId = uuid.v4()) {
         return new Promise((resolve, reject) => {
             new Offer({
-                id: uuid.v4(),
+                id: offerId,
                 trade_id: tradeid,
                 owner_id: steamid,
                 buyer_id: "",

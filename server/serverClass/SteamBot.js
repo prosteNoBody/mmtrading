@@ -143,19 +143,12 @@ class SteamBot {
     }
 
     /**
-     * Return result after trying to create new offer
-     * @callback ReturnOfferResult
-     * @param {string} error
-     * @param {string} offerId
-     */
-
-    /**
-     * create inital item offer
+     * create initial item offer
      * @param  {string} tradeurl
      * @param  {Array.string} items
-     * @param {ReturnOfferResult} cb
+     * @param  {string} offerId
      */
-    createNewOffer = async (tradeurl, items) => {
+    createNewSteamTrade = async (tradeurl, items, offerId) => {
         return new Promise((resolve, reject) => {
             let offer = this.manager.createOffer(tradeurl);
             items = items.map(item => {
@@ -166,7 +159,7 @@ class SteamBot {
                 }
             })
             offer.addTheirItems(items);
-            offer.setMessage("Offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it");
+            offer.setMessage(`This offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it \n Offer id: ${offerId}`);
             offer.send(err => {
                 if(err) {
                     return reject(err);
@@ -177,7 +170,13 @@ class SteamBot {
         })
     }
 
-    createWithdrawOffer = async (tradeurl, items) => {
+    /**
+     * create initial item offer
+     * @param  {string} tradeurl
+     * @param  {Array.string} items
+     * @param  {string} offerId
+     */
+    createWithdrawSteamTrade = async (tradeurl, items, offerId) => {
         return new Promise((resolve, reject) => {
             let offer = this.manager.createOffer(tradeurl);
             items = items.map(item => {
@@ -188,7 +187,7 @@ class SteamBot {
                 }
             })
             offer.addMyItems(items);
-            offer.setMessage("Offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it");
+            offer.setMessage(`This offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it \n Offer id: ${offerId}`);
             offer.send(err => {
                 if(err) {
                     return reject(err);

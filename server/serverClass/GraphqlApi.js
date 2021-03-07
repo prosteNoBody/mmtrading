@@ -1,3 +1,5 @@
+const uuid = require('uuid');
+
 const {
     GraphQLSchema,
     GraphQLObjectType,
@@ -251,8 +253,9 @@ class GraphqlApi {
                                 return {error: 14};
                             }
                             try {
-                                let offerid = await steamBot.createNewOffer(tradeLink, items);
-                                let link = await db.createNewOffer(req.user.steamid, offerid, items, price);
+                                const offerId = uuid.v4();
+                                let offerid = await steamBot.createNewSteamTrade(tradeLink, items, offerId);
+                                let link = await db.createNewOffer(req.user.steamid, offerid, items, price, offerId);
                                 return { success: true, link: link };
                             } catch {
                                 return {error: 13};
@@ -292,7 +295,7 @@ class GraphqlApi {
                                 return {error: 4};
                             }
                             try {
-                                let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
+                                let tradeId = await steamBot.createWithdrawSteamTrade(userTradeUrl, offer.items, offer.id);
                                 await db.setTradeId(offerid, tradeId);
                                 return {success: true};
                             } catch {
@@ -374,7 +377,7 @@ class GraphqlApi {
                                 return {error: 4};
                             }
                             try {
-                                let tradeId = await steamBot.createWithdrawOffer(userTradeUrl, offer.items);
+                                let tradeId = await steamBot.createWithdrawSteamTrade(userTradeUrl, offer.items, offer.id);
                                 await db.setTradeId(offerid, tradeId);
                                 return {success: true};
                             } catch {
