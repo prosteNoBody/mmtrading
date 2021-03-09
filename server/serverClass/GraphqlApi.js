@@ -18,57 +18,52 @@ const OFFER_STATE = require('../types/OfferState');
 class GraphqlApi {
     constructor(steamBot, db){
         this.DescriptionType = new GraphQLObjectType({
-            name: 'Description',
-            description: 'Description of item',
+            name: 'PopisekSkinu',
             fields: () => ({
-                type: {type: GraphQLString},
-                value: {type: GraphQLString},
-                color: {type: GraphQLString},
+                type: {type: GraphQLString, description: 'Určuje typ popisku'},
+                value: {type: GraphQLString, description: 'Určuje obsah popisku'},
+                color: {type: GraphQLString, description: 'Určuje barvu popisku'},
             })
         });
 
         this.ItemType = new GraphQLObjectType({
-            name: 'Item',
-            description: 'Represent item from inventory.',
+            name: 'Skin',
             fields: () => ({
-                index: {type: GraphQLInt},
-                assetid: {type: GraphQLString},
-                name: {type: GraphQLString},
-                icon_url: {type: GraphQLString},
-                rarity: {type: GraphQLString},
-                color: {type: GraphQLString},
-                descriptions: {type: GraphQLList(this.DescriptionType)},
+                index: {type: GraphQLInt, description: 'Pořadové číslo v steam inventáři'},
+                assetid: {type: GraphQLString, description: 'SteamID pro skin'},
+                name: {type: GraphQLString, description: 'Jméno skinu'},
+                icon_url: {type: GraphQLString, description: 'Url odkaz na ikonku obrázku'},
+                rarity: {type: GraphQLString, description: 'Název rarity skinu'},
+                color: {type: GraphQLString, description: 'Hex kod barvy rarity skinu'},
+                descriptions: {type: GraphQLList(this.DescriptionType), description: 'Pole s popisky u skinu'},
             })
         });
 
         this.InventoryType = new GraphQLObjectType({
             name: 'Inventory',
-            description: 'Returning value from api contain error and items',
             fields: () => ({
-                error: {type: GraphQLString},
-                items: {type: GraphQLList(this.ItemType)}
+                error: {type: GraphQLString, description: 'Důvod proč nešel načíst inventář'},
+                items: {type: GraphQLList(this.ItemType), description: 'Jednotlivé předměty v poli'}
             })
         });
 
         this.UserType = new GraphQLObjectType({
-            name: 'UserInfo',
-            description: 'User info',
+            name: 'User',
             fields: () => ({
-                steamid: {type: GraphQLString},
-                name: {type: GraphQLString},
-                avatar: {type: GraphQLString},
-                credit: {type: GraphQLInt},
-                tradeUrl: {type: GraphQLString},
+                steamid: {type: GraphQLString, description: 'SteamID pro uživatele'},
+                name: {type: GraphQLString, description: 'Přezdívka uživatele na platformě steam'},
+                avatar: {type: GraphQLString, description: 'Url odkaz na obrázek avatara uživatele'},
+                credit: {type: GraphQLInt, description: 'Počet kreditů vlastněné uživatelem'},
+                tradeUrl: {type: GraphQLString, description: 'Trade url uživatele'},
             })
         })
 
         this.OwnerType = new GraphQLObjectType({
             name: 'BuyerInfo',
-            description: 'Buyers info',
             fields: () => ({
-                owner_id: {type: GraphQLString},
-                name: {type: GraphQLString},
-                avatar: {type: GraphQLString},
+                owner_id: {type: GraphQLString, description: 'SteamID uživatele, který vlastní nabídku'},
+                name: {type: GraphQLString, description: 'Přezdívka uživatele, který vlastní nabídku'},
+                avatar: {type: GraphQLString, description: 'Url odkaz na obrázek avatara uživatele, který vlastní nabídku'},
             })
         })
 
@@ -76,87 +71,77 @@ class GraphqlApi {
             name: 'TradeUrl',
             description: 'tradelink resolver',
             fields: () => ({
-                error: {type: GraphQLString},
-                tradeurl: {type: GraphQLString},
-                changed: {type: GraphQLBoolean}
+                error: {type: GraphQLString, description: 'Kód chyby'},
+                tradeurl: {type: GraphQLString, description: 'Trade url uživatele'},
+                changed: {type: GraphQLBoolean, description: 'Vrací true, pokud byla url změněna'}
             })
         })
 
         this.OfferResponse = new GraphQLObjectType({
-            name: 'OfferResponse',
+            name: 'ResponseNabidky',
             description: 'Return offer response',
             fields: () => ({
-                error: {type: GraphQLInt},
-                success: {type: GraphQLBoolean},
-                link: {type: GraphQLString}
+                error: {type: GraphQLInt, description: 'Kód chyby'},
+                success: {type: GraphQLBoolean, description: 'Vrací true, pokud akce proběhla úspěšně'},
+                link: {type: GraphQLString, description: 'Odkaz na nabídku'}
             })
         })
 
         this.CreditResponse = new GraphQLObjectType({
-            name: 'SimpleResponse',
+            name: 'ResponseKrediu',
             description: 'Return error or success boolean',
             fields: () => ({
-                error: {type: GraphQLInt},
-                success: {type: GraphQLBoolean},
-                credit: {type: GraphQLFloat},
+                error: {type: GraphQLInt, description: 'Kód chyby'},
+                success: {type: GraphQLBoolean, description: 'Vrací true, pokud akce proběhla úspěšně'},
+                credit: {type: GraphQLFloat, description: 'Nový stav peněženky uživatele'},
             })
         })
 
         this.Offer = new GraphQLObjectType({
-            name: 'Offer',
-            description: 'Return offer object',
+            name: 'Nabidka',
             fields: () => ({
-                id: {type: GraphQLString},
-                is_mine: {type: GraphQLBoolean},
-                is_buyer: {type: GraphQLString},
-                owner: {type: this.OwnerType},
-                buyer_id: {type: GraphQLString},
-                trade_id: {type: GraphQLString},
-                price: {type: GraphQLFloat},
-                items: {type: GraphQLList(this.ItemType)},
-                date: {type: GraphQLString},
-                status: {type: GraphQLInt},
+                id: {type: GraphQLString, description: 'ID nabídky'},
+                is_mine: {type: GraphQLBoolean, description: 'Vrací true, pokud je nabídka vlastněná přihlášeným uživatelem'},
+                is_buyer: {type: GraphQLString, description: 'Vrací true, pokud je nabídka zakoupená přihlášeným uživatelem'},
+                owner: {type: this.OwnerType, description: 'Vrací objekt, majitele nabídky'},
+                buyer_id: {type: GraphQLString, description: 'SteamID kupujícího'},
+                trade_id: {type: GraphQLString, description: 'SteamID kupujícího'},
+                price: {type: GraphQLFloat, description: 'Cena nabídky'},
+                items: {type: GraphQLList(this.ItemType), description: 'Pole s ID skinů'},
+                date: {type: GraphQLString, description: 'Datum nabídky'},
+                status: {type: GraphQLInt, description: 'Status nabídky'},
             })
         })
 
         this.OneOfferResolve = new GraphQLObjectType({
-            name: 'OfferResolve',
-            description: 'Return resolve for one offer',
+            name: 'ResponseJedneNabidky',
             fields: () => ({
-                error: {type: GraphQLInt},
-                offer: {type: this.Offer},
+                error: {type: GraphQLInt, description: 'Kód chyby'},
+                offer: {type: this.Offer, description: 'Vrací jednu konkrétní nabídku'},
             })
         })
 
         this.AllOffersResolve = new GraphQLObjectType({
-            name: 'OffersResolve',
-            description: 'Return resolve for all offers',
+            name: 'ResponseViceroNabidek',
             fields: () => ({
-                error: {type: GraphQLInt},
-                offers: {type: GraphQLList(this.Offer)}
-            })
-        })
-
-        this.ResolveUserType = new GraphQLObjectType({
-            name: 'User',
-            description: 'Return value of user get query',
-            fields: () => ({
-                error: {type: GraphQLString},
-                user: {type: this.UserType},
+                error: {type: GraphQLInt, description: 'Kód chyby'},
+                offers: {type: GraphQLList(this.Offer), description: 'Vrací vícero nabídek v poli'}
             })
         })
 
         this.RootAuthQueryType = new GraphQLObjectType({
-            name: 'Query',
-            description: 'Root Query',
+            name: 'MMTrading',
             fields: () => ({
                 createDummyWithdrawOffer: {
                     type: GraphQLBoolean,
                     args: {
                         key: {type: GraphQLString},
                     },
-                    description: 'Create dummy offer from bot items to withdraw',
+                    description: 'TESTOVACÍ | Slouží k vytvoření nabídky u steam bota z volných předmětů',
                     resolve: async (parent, { key }, req) => {
+                        if(createDummyOfferKey === '') {
+                            return false;
+                        }
                         if (key !== createDummyOfferKey) {
                             return  false;
                         }
@@ -172,9 +157,9 @@ class GraphqlApi {
                         return await db.createDummyWithdrawOffer(req.user.steamid, [items[Math.floor(Math.random() * items.length)].assetid]);
                     }
                 },
-                inventory: {
+                getInventory: {
                     type: this.InventoryType,
-                    descriptions: 'Result inventory data',
+                    description: 'Vrací skiny z inventáře uživatele',
                     resolve: async (parent, args, req) => {
                         if(!req.user) {
                             return {error: "You are required to be logged in! Please re/login first."};
@@ -190,7 +175,7 @@ class GraphqlApi {
                 },
                 getTradeUrl: {
                     type: this.TradeUrl,
-                    description: 'Update and fetch trade url',
+                    description: 'Slouží k získání url, pokud je v parametru nová url tak jí přenastaví a vrací',
                     args: {
                         tradeUrl: {type: GraphQLString},
                         test: {type: GraphQLList(GraphQLString)}
@@ -225,7 +210,7 @@ class GraphqlApi {
                 },
                 createOffer: {
                     type: this.OfferResponse,
-                    description: 'Create initial offer',
+                    description: 'Vytvoří nabídku - v parametrech je nutné ovést cenu a ID skinů v poli',
                     args: {
                         items: {type: GraphQLList(GraphQLString)},
                         price: {type: GraphQLString},
@@ -268,7 +253,7 @@ class GraphqlApi {
                 },
                 withdrawOffer: {
                     type: this.OfferResponse,
-                    description: 'Withdraw offer',
+                    description: 'Zruší nabídku uživatelem - v parametru je potřeba uvést platné id nabídky',
                     args: {
                         offerid: {type: GraphQLString},
                     },
@@ -309,7 +294,7 @@ class GraphqlApi {
                 },
                 buyOffer: {
                     type: this.OfferResponse,
-                    description: 'Buy offer',
+                    description: 'Zakoupí nabídku - v parametrech je potřeba uvést platné id nabídky',
                     args: {
                         offerid: {type: GraphQLString},
                     },
@@ -350,7 +335,7 @@ class GraphqlApi {
                 },
                 withdrawBoughtItems: {
                     type: this.OfferResponse,
-                    description: 'Withdraw bought offer',
+                    description: 'Vybere předměty ze zakoupených nabídek, k vybrání předmětů - jako parametr je potřeba uvést platné offer id',
                     args: {
                         offerid: {type: GraphQLString},
                     },
@@ -391,7 +376,7 @@ class GraphqlApi {
                 },
                 getAllOffers: {
                     type: this.AllOffersResolve,
-                    description: 'Get all offers owned by user',
+                    description: 'Vrací seznam všech nabídek vlastněné uživatelem - podle parametru jde přepnou na zakoupené nabídky',
                     args: {
                         method: {type: GraphQLBoolean},
                     },
@@ -427,7 +412,7 @@ class GraphqlApi {
                 },
                 getOffer: {
                     type: this.OneOfferResolve,
-                    description: 'Get one offer by id',
+                    description: 'Vrací jednu konkrétní nabídku - jako parametr musíte uvést platnou id nabídky',
                     args: {
                         offerId: {type: GraphQLString},
                     },
@@ -459,7 +444,7 @@ class GraphqlApi {
                 },
                 getCredit: {
                     type: this.CreditResponse,
-                    description: 'Add credit to your account',
+                    description: 'Slouží pro přidání kreditu na účet uživatele - jako parametr si volíte možnost, která určuje počet kreditů',
                     args: {
                         option: {type: GraphQLInt},
                     },

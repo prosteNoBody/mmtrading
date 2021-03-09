@@ -29,7 +29,7 @@ const Container = styled.div`
   background: radial-gradient(circle, rgba(247,247,247,1) 0%, rgba(230,230,230,1) 100%);
 `;
 type RespondData = {
-    inventory?: {
+    getInventory?: {
         error?: string,
         items: ItemType[]
     };
@@ -57,7 +57,7 @@ const TRADE_LINK_REQUEST = gql`
 `
 const ITEM_REQUEST = gql`
     {
-        inventory{
+        getInventory{
             error
             items{
                 index
@@ -87,12 +87,12 @@ const OfferEditor: React.FC<Props> = (props) => {
     const [getItemsQuery, {loading}] = useLazyQuery<RespondData>(ITEM_REQUEST, {
         fetchPolicy: "network-only",
         onCompleted: data => {
-            if(data.inventory.error)
-                setErrorMessage(data.inventory.error);
-            if(data.inventory.items){
+            if(data.getInventory.error)
+                setErrorMessage(data.getInventory.error);
+            if(data.getInventory.items){
                 setErrorMessage(null);
-                setInventory(data.inventory.items);
-                setInventoryItems(sortItems(data.inventory.items));
+                setInventory(data.getInventory.items);
+                setInventoryItems(sortItems(data.getInventory.items));
                 setOfferItems([]);
             }
         },
