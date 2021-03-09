@@ -159,7 +159,7 @@ class SteamBot {
                 }
             })
             offer.addTheirItems(items);
-            offer.setMessage(`This offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it \n Offer id: ${offerId}`);
+            offer.setMessage(`This offer created by mmtrading.com - offer id: ${offerId}`);
             offer.send(err => {
                 if(err) {
                     return reject(err);
@@ -187,7 +187,7 @@ class SteamBot {
                 }
             })
             offer.addMyItems(items);
-            offer.setMessage(`This offer created by mmtrading.com - if this is not offer that you expect, please deny and ignore it \n Offer id: ${offerId}`);
+            offer.setMessage(`This offer created by mmtrading.com - offer id: ${offerId}`);
             offer.send(err => {
                 if(err) {
                     return reject(err);
