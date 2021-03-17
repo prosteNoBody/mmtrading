@@ -5,6 +5,7 @@ import {UserType} from '../components/Types';
 
 import MainContainer from "../components/MainContainer";
 import Navbar from "../components/Navbar";
+import IndexEditor from "../components/IndexEditor";
 import { GetServerSideProps } from 'next'
 import {IncomingMessage} from "http";
 
@@ -19,6 +20,7 @@ const indexPage = (props:Props) => {
                 <title>MMTrading</title>
             </Head>
             <Navbar user={user}/>
+            <IndexEditor/>
         </MainContainer>
     );
 };

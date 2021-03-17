@@ -197,7 +197,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
                 {generateProfileInfo(avatar,persona)}
                 <ItemsManager emptyInventoryMessage="Offer preview" items={items} action={()=>{}} gridSelector={"inventory"} createDescriptions={false} itemSize={"80px"}/>
                 <PriceEditor price={price ? price : ""} editPrice={editPrice} sendOffer={sendItems}/>
-                <LazyLoadingButton small={true} isLoading={loading} displayedText="ODESLAT" action={() => {sendItems()}}/>
+                <LazyLoadingButton small={true} isLoading={loading} displayedText="SEND" action={() => {sendItems()}}/>
             </SemiContainer>
         </Container>
     )
