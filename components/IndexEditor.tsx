@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import UserGuide from "./UserGuide";
 
-
 type ContainerProp = {
     bgSrc: string;
 }
@@ -29,13 +28,30 @@ const Container = styled.div`
     background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
   }
 `;
-
+const THEMES = [
+    {
+        bg: '/bg1.jpg',
+        color: 'ancient'
+    },
+    {
+        bg: '/bg2.jpg',
+        color: 'rare'
+    },
+    {
+        bg: '/bg3.jpg',
+        color: 'deepgreen'
+    },
+    {
+        bg: '/bg4.jpg',
+        color: 'mythical'
+    },
+];
 const IndexEditor: React.FC = () => {
-    const bgImageSrc = Math.random() < 0.5 ? '/bg1.jpg' : '/bg2.jpg';
+    const themeStyle = THEMES[Math.floor(Math.random() * THEMES.length)];
 
     return (
-        <Container bgSrc={bgImageSrc}>
-            <UserGuide/>
+        <Container bgSrc={themeStyle.bg}>
+            <UserGuide themeColor={themeStyle.color}/>
         </Container>
     );
 };

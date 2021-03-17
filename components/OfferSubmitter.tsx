@@ -148,7 +148,7 @@ const OfferSubmitter: React.FC<Props> = (props) => {
               );
           }
           return (
-              <ProfileInfoWrapper>{persona} <ProfileImgWrapper><img src={avatar}/></ProfileImgWrapper></ProfileInfoWrapper>
+              <ProfileInfoWrapper>{persona} <ProfileImgWrapper><img alt={"profile_picture"} src={avatar}/></ProfileImgWrapper></ProfileInfoWrapper>
           )
     };
 
