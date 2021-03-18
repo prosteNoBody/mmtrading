@@ -18,7 +18,7 @@ const Container = styled.div`
 `;
 
 const LinkWrapper = styled.div`
-  background: var(--color-immortal);
+  background: var(--color-black);
   color: var(--color-white);
   
   display: flex;
@@ -34,10 +34,10 @@ const LinkWrapper = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  background: var(--color-immortal);
+  background: var(--color-black);
   color: var(--color-white);
   &:hover{
-    color: var(--color-immortal);
+    color: var(--color-black);
     background: var(--color-white);
   }
 

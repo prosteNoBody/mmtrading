@@ -20,7 +20,8 @@ const Container = styled.div`
   margin-bottom: 3rem;
   padding: .5rem;
   
-  background: var(--color-arcana);
+  background: var(--color-white);
+  box-shadow: inset 0 0 .5rem var(--color-black);
 `;
 
 const SemiContainer = styled.div`
@@ -92,7 +93,7 @@ const ToggleButtonWrapper = styled.div`
   
   font-size: 1.5rem;
   
-  color: var(--color-white);
+  color: var(--color-black);
   
   @media (max-width: 1250px) {
     font-size: 1rem;
@@ -124,11 +125,11 @@ const DescriptionTitle = styled.div`
   font-size: 1.2rem;
   font-weight: bold;
   
-  color: var(--color-white);
+  color: var(--color-black);
 `;
 
 const PriceWrapper = styled.div`
-  color: var(--color-white);
+  color: var(--color-black);
 
   position: relative;
   
@@ -260,7 +261,7 @@ const OverMessage = styled.div`
   height: 20%;
  
   background: var(--color-${(props:OverMessageType) => props.isCancel ? 'ancient' : 'deepgreen'});
-  color: white;
+  color: var(--color-white);
   
   transform: translateY(-50%);
 `;
@@ -465,7 +466,7 @@ const Offer: React.FC<Props> = (props) => {
             color = "immortal";
             time = 'in ' + Math.ceil((d.getTime() + ITEMS_TRADE_BAN_EXPIRE * 1000 * 60 * 60 * 24 - new Date().getTime()) / 1000 / 60 / 60 / 24).toString() + ' day/s';
         } else {
-            color = "white";
+            color = "black";
             const c = d => {return d < 10 ? '0' + d : d};
             time = [c(d.getDate()), c(d.getMonth() + 1), c(d.getFullYear())].join('.');
         }
