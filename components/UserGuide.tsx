@@ -63,6 +63,11 @@ const ItemDescription = styled.div`
   text-align: center;
 `;
 
+const RedirectLink = styled.span`
+  cursor: pointer;
+  font-weight: bold;
+`;
+
 type Props = {
     themeColor: string;
 }
@@ -79,7 +84,7 @@ const UserGuide: React.FC<Props> = (props) => {
                     </ContainerItem>
                     <h3>1. Log-in with Steam</h3>
                     <ItemDescription>
-                        Login trought your steam account and set trade link url in <Link href={"/settings"}><strong>Settings</strong></Link>.
+                        Login trought your steam account and set trade link url in <Link href={"/settings"}><RedirectLink>Settings</RedirectLink></Link>.
                     </ItemDescription>
                 </ContainerItem>
                 <ContainerItem>
@@ -93,7 +98,7 @@ const UserGuide: React.FC<Props> = (props) => {
                     </ContainerItem>
                     <h3>2. Create offer</h3>
                     <ItemDescription>
-                        Select items and create new offer on <Link href={"/dashboard"}><strong>Dashboard</strong></Link>.
+                        Select items and create new offer on <Link href={"/dashboard"}><RedirectLink>Dashboard</RedirectLink></Link>.
                     </ItemDescription>
                 </ContainerItem>
                 <ContainerItem>
@@ -107,7 +112,7 @@ const UserGuide: React.FC<Props> = (props) => {
                     </ContainerItem>
                     <h3>3. Send link to buyer</h3>
                     <ItemDescription>
-                        Copy link from offer page and send it to buyer. All offer can be found in <Link href={"/offers"}><strong>Offers</strong></Link>.
+                        Copy link from offer page and send it to buyer. All offer can be found in <Link href={"/offers"}><RedirectLink>Offers</RedirectLink></Link>.
                     </ItemDescription>
                 </ContainerItem>
             </StepContainer>
