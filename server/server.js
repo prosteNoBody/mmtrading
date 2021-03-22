@@ -85,6 +85,7 @@ app.prepare().then(() => {
 
     server.listen(port, err => {
         if (err) throw err;
-        console.log(`> Ready on website http://localhost:${port}`)
+        if(process.env.NODE_ENV === 'production') console.log(`> Ready on website http://localhost:${port}`);
+        else console.log('> App is running on production successfully');
     })
 });
