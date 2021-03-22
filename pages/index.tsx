@@ -1,4 +1,5 @@
 import * as React from "react";
+import styled from 'styled-components';
 import Head from "next/dist/next-server/lib/head";
 
 import {UserType} from '../components/Types';
@@ -8,6 +9,21 @@ import Navbar from "../components/Navbar";
 import IndexEditor from "../components/IndexEditor";
 import { GetServerSideProps } from 'next'
 import {IncomingMessage} from "http";
+
+const TosLink = styled.div`
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  
+  text-decoration: underline;
+  color: gray;
+  
+  cursor: pointer;
+  
+  &:hover {
+    color: gainsboro;
+  }
+`;
 
 type Props = {
     user?: UserType;
@@ -21,6 +37,9 @@ const indexPage = (props:Props) => {
             </Head>
             <Navbar user={user}/>
             <IndexEditor/>
+            <a href={"/tos"} target="_blank">
+                <TosLink>Terms of Service</TosLink>
+            </a>
         </MainContainer>
     );
 };
