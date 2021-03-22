@@ -23,7 +23,7 @@ if(process.env.NODE_ENV === 'production') {
         "mongoUrl": process.env.MONGO_URL,
         "steamApi": process.env.STEAM_API,
         "createDummyOfferKey": process.env.CREATE_DUMMY_OFFER_KEY,
-    }
+    };
 } else {
     keys = require('./keys');
 }

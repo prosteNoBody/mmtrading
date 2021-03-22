@@ -139,21 +139,15 @@ class GraphqlApi {
                     },
                     description: 'TESTOVACÍ | Slouží k vytvoření nabídky u steam bota z volných předmětů',
                     resolve: async (parent, { key }, req) => {
-                        if(createDummyOfferKey === '') {
-                            return false;
-                        }
-                        if (key !== createDummyOfferKey) {
+                        if (createDummyOfferKey === '' && key !== createDummyOfferKey && !req.user) {
                             return  false;
-                        }
-                        if(!req.user) {
-                            return false;
                         }
 
                         let items = await steamBot.getBotItems();
-
                         if(items.length === 0) {
                             return false;
                         }
+
                         return await db.createDummyWithdrawOffer(req.user.steamid, [items[Math.floor(Math.random() * items.length)].assetid]);
                     }
                 },
