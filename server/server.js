@@ -9,7 +9,8 @@ const SteamBot = require('./serverClass/SteamBot');
 const Database = require('./serverClass/Database');
 const OfferCronJob = require('./serverClass/OfferCronJob');
 const GraphqlApi = require('./serverClass/GraphqlApi');
-const config = require('./config');
+
+const config = process.env.NODE_ENV === 'production' ? require('./prod_config') : require('./config');
 
 let keys;
 if(process.env.NODE_ENV === 'production') {

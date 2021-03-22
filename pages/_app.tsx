@@ -6,6 +6,8 @@ import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
 import { ToastProvider } from 'react-toast-notifications';
 
+const URI = process.env.NODE_ENV !== 'production' ? 'http://localhost:3000/api' : 'https://mmtrading.herokuapp.com/api';
+
 const client = new ApolloClient({
     uri: 'http://localhost:3000/api',
     fetch: fetch,
