@@ -10,13 +10,14 @@ const {
     GraphQLFloat
 } = require('graphql');
 
-const {createDummyOfferKey} = require('../keys.json');
 const { extractTokenFromUrl, indexUsers } = require('../helpFunctions');
 
 const OFFER_STATE = require('../types/OfferState');
 
 class GraphqlApi {
-    constructor(steamBot, db){
+    constructor(steamBot, db, keys){
+        const {createDummyOfferKey} = keys;
+
         this.DescriptionType = new GraphQLObjectType({
             name: 'PopisekSkinu',
             fields: () => ({

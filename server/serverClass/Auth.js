@@ -2,11 +2,11 @@ const passport = require("passport");
 const SteamStrategy = require("passport-steam").Strategy;
 const User = require("../models/User");
 
-const API_KEY = require('../keys.json').steamApi;
 const {REALM_URL, RETURN_URL} = require('../config');
 
 class Auth{
-    constructor(login,profile){
+    constructor(login, profile, keys){
+        this.API_KEY = keys.steamApi;
         this.siteLogin = login;
         this.siteProfile = profile;
     }
@@ -25,7 +25,7 @@ class Auth{
         passport.use(new SteamStrategy({
             returnURL: RETURN_URL,
             realm: REALM_URL,
-            apiKey: API_KEY,
+            apiKey: this.API_KEY,
         }, (identifier, profile, done) => {
             /**
              * @param {Object} steamProfile - steam profile
