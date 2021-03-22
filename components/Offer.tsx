@@ -219,7 +219,7 @@ const ProfileInfoWrapper = styled(BottomSeparator)`
   margin-top: .1rem;
   padding-bottom: 0.3rem;
   
-  color: var(--color-white);
+  color: var(--color-black);
   
   font-size: 1.3rem;
   font-weight: bold;
