@@ -10,7 +10,7 @@ const Database = require('./serverClass/Database');
 const OfferCronJob = require('./serverClass/OfferCronJob');
 const GraphqlApi = require('./serverClass/GraphqlApi');
 
-const config = process.env.NODE_ENV === 'production' ? require('./prod_config') : require('./config');
+const config = process.env.NODE_ENV !== 'production' ? require('./prod_config') : require('./config');
 
 let keys;
 if(process.env.NODE_ENV === 'production') {
@@ -36,13 +36,12 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const indexPage = '/';
-const mainPage = '/dashboard';
 
 const bot = new SteamBot(keys, config.INITIAL_OFFER_CANCEL_TIME);
 const db = new Database(keys);
 const graphqlApi = new GraphqlApi(bot, db, keys);
 const offerCronJob = new OfferCronJob(bot, db, config.CHECK_OFFERS_IN_MINUTES, config.ITEMS_TRADE_BAN_EXPIRE);
-const auth = new Auth(indexPage, mainPage, keys);
+const auth = new Auth(indexPage, keys, config);
 const store = new MongoDBStore({
     uri: keys.mongoUrl,
     collection: 'authSession'
@@ -66,7 +65,7 @@ app.prepare().then(() => {
     auth.initialize(server);
 
     server.get(/^\/auth\/((login)|(return))$/, auth.authenticate(), (req, res) => {
-        res.redirect(mainPage);
+        res.redirect(indexPage);
     });
 
     server.get('/auth/logout', (req, res) => {

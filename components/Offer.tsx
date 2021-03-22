@@ -4,7 +4,6 @@ import { useToasts } from 'react-toast-notifications';
 
 import {OfferType} from "./Types";
 import OFFER_STATE from '../server/types/OfferState';
-import {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} from '../server/config';
 
 import {useLazyQuery} from "@apollo/react-hooks";
 import {gql} from 'apollo-boost';
@@ -14,6 +13,14 @@ import CopyLink from "./CopyLink";
 import LazyLoadingButton from "./LazyLoadingButton";
 
 import {getErrorMessage} from "./helpFunctions";
+
+let config;
+if(process.env.NODE_ENV === 'production') {
+    config = require('../server/prod_config');
+} else {
+    config = require('../server/config');
+}
+const {INITIAL_OFFER_CANCEL_TIME, ITEMS_TRADE_BAN_EXPIRE} = config;
 
 const Container = styled.div`
   position: relative;

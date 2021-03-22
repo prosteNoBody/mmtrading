@@ -2,13 +2,11 @@ const passport = require("passport");
 const SteamStrategy = require("passport-steam").Strategy;
 const User = require("../models/User");
 
-const {REALM_URL, RETURN_URL} = require('../config');
-
 class Auth{
-    constructor(login, profile, keys){
+    constructor(keys, config){
         this.API_KEY = keys.steamApi;
-        this.siteLogin = login;
-        this.siteProfile = profile;
+        this.RETURN_URL = config.RETURN_URL;
+        this.REALM_URL = config.REALM_URL;
     }
     initialize = (server) => {
         server.use(passport.initialize());
@@ -23,8 +21,8 @@ class Auth{
                 });
         });
         passport.use(new SteamStrategy({
-            returnURL: RETURN_URL,
-            realm: REALM_URL,
+            returnURL: this.RETURN_URL,
+            realm: this.REALM_URL,
             apiKey: this.API_KEY,
         }, (identifier, profile, done) => {
             /**
@@ -67,20 +65,6 @@ class Auth{
             res.send({data:{error:"You are required to be logged in! Please re/login first."}});
         }
     };
-    isAuth = (req,res,next) => {
-        if(req.user){
-            next();
-        }else{
-            res.redirect(this.siteLogin);
-        }
-    };
-    isNotAuth = (req,res,next) => {
-        if(!req.user){
-            next();
-        }else{
-            res.redirect(this.siteProfile);
-        }
-    }
 }
 
 module.exports = Auth;
