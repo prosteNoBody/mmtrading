@@ -10,7 +10,23 @@ const Database = require('./serverClass/Database');
 const OfferCronJob = require('./serverClass/OfferCronJob');
 const GraphqlApi = require('./serverClass/GraphqlApi');
 const config = require('./config');
-const keys = require('./keys');
+
+let keys;
+if(process.env.NODE_ENV === 'production') {
+    keys = {
+        "bot_id": process.env.BOT_ID,
+        "bot_display_name": process.env.BOT_DISPLAY_NAME,
+        "bot_username": process.env.BOT_USERNAME,
+        "bot_password": process.env.BOT_PASSWORD,
+        "bot_identity_secret": process.env.BOT_IDENTITY_SECRET,
+        "bot_shared_secret": process.env.BOT_SHARED_SECRET,
+        "mongoUrl": process.env.MONGO_URL,
+        "steamApi": process.env.STEAM_API,
+        "createDummyOfferKey": process.env.CREATE_DUMMY_OFFER_KEY,
+    }
+} else {
+    keys = require('./keys');
+}
 
 
 const port = parseInt(process.env.PORT, 10) || 3000;
