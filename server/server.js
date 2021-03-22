@@ -41,7 +41,7 @@ const bot = new SteamBot(keys, config.INITIAL_OFFER_CANCEL_TIME);
 const db = new Database(keys);
 const graphqlApi = new GraphqlApi(bot, db, keys);
 const offerCronJob = new OfferCronJob(bot, db, config.CHECK_OFFERS_IN_MINUTES, config.ITEMS_TRADE_BAN_EXPIRE);
-const auth = new Auth(indexPage, mainPage);
+const auth = new Auth(indexPage, mainPage, keys);
 const store = new MongoDBStore({
     uri: keys.mongoUrl,
     collection: 'authSession'
