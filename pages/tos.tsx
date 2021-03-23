@@ -1,8 +1,9 @@
 import * as React from "react";
+import {useState} from "react";
 import styled from 'styled-components';
 import Head from "next/dist/next-server/lib/head";
 
-import TOS_RULES from '../components/tosText';
+import TOS from '../components/tosText';
 
 const MainContainer = styled.div`
   display: flex;
@@ -31,23 +32,54 @@ const TosLine = styled.div`
   padding: .3rem;
 `;
 
+const LanguageContainer = styled.div`
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  
+  display: flex;
+`;
+
+type LanguageSelectProps = {
+    selected: boolean;
+}
+const LanguageSelect = styled.div`
+  margin: 0 10px;
+  color: ${(props: LanguageSelectProps) => props.selected ? 'grey' : 'darkgrey'};
+  
+  text-decoration: ${(props: LanguageSelectProps) => props.selected ? 'none' : 'underline'};
+  cursor: ${(props: LanguageSelectProps) => props.selected ? 'default' : 'pointer'};
+  
+  &:hover {
+    color: grey;
+  }
+`;
+
 const tos = () => {
+    const [language, setLanguage] = useState('en');
+
     const generateTos = () => {
-        return TOS_RULES.map((rule, index) => {
+        return TOS[language].map((rule, index) => {
             return <TosLine><strong>{ index + 1 }. </strong>{rule}</TosLine>
-        })
+        });
     }
 
     return (
-        <MainContainer>
-            <Head>
-                <title>Terms of Service</title>
-            </Head>
-            <Container>
-                <Title>Terms of Service</Title>
-                { generateTos() }
-            </Container>
-        </MainContainer>
+        <>
+            <MainContainer>
+                <Head>
+                    <title>Terms of Service</title>
+                </Head>
+                <Container>
+                    <Title>Terms of Service</Title>
+                    { generateTos() }
+                </Container>
+            </MainContainer>
+            <LanguageContainer>
+                <LanguageSelect onClick={() => setLanguage('en')} selected={language === 'en'}>EN</LanguageSelect>
+                <LanguageSelect onClick={() => setLanguage('cs')} selected={language === 'cs'}>CZ</LanguageSelect>
+            </LanguageContainer>
+        </>
     );
 };
 
