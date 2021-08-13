@@ -22,7 +22,7 @@
         "graphql-tag": "^2.11.0",
         "isomorphic-unfetch": "^3.1.0",
         "mongoose": "^5.11.5",
-        "next": "^10.0.3",
+        "next": "^11.1.0",
         "passport": "^0.4.1",
         "passport-steam": "^1.0.14",
         "react": "16.13.1",
