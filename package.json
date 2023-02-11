@@ -48,7 +48,7 @@
         "@types/steam-totp": "^2.1.0",
         "@types/styled-components": "^5.1.4",
         "babel-plugin-styled-components": "^1.12.0",
-        "nodemon": "^2.0.6",
+        "nodemon": "^2.0.20",
         "typescript": "^3.9.7"
     }
 }
